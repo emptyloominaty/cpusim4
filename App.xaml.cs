@@ -11,5 +11,18 @@ namespace CpuSim4 {
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application {
+        public static Cpu cpu;
+        public static OpCodes opCodes;
+
+        protected override void OnStartup(StartupEventArgs e) {
+            base.OnStartup(e);
+
+            opCodes = new OpCodes();
+
+            cpu = new Cpu(opCodes.codes);
+
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+        }
     }
 }

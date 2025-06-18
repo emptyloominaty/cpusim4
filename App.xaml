@@ -4,6 +4,28 @@
              xmlns:local="clr-namespace:CpuSim4"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style TargetType="Control">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="#FAFAfA"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="#FAFAfA"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="#FAFAfA"/>
+            <Setter Property="Background" Value="#555555"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="#FAFAfA"/>
+            <Setter Property="Background" Value="#555555"/>
+        </Style>
     </Application.Resources>
 </Application>
