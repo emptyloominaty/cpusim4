@@ -21,5 +21,18 @@ namespace CpuSim4 {
         public MainWindow() {
             InitializeComponent();
         }
+
+        private void ToggleCpu(object sender, RoutedEventArgs e) {
+            if (App.cpu.cpuRunning) {
+                App.cpu.cpuRunning = false;
+                BtnCpuToggle.Content = "Start";
+            } else {
+                App.cpu.Reset();
+                App.cpu.cpuRunning = true;
+                BtnCpuToggle.Content = "Stop";
+            }
+        }
+
     }
+
 }

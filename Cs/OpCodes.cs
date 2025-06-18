@@ -49,8 +49,8 @@ namespace CpuSim4 {
             codes[21] = new OpCode("SUC", 4, 0);
             codes[22] = new OpCode("NOP", 1, 0);
             codes[23] = new OpCode("JMP", 4, 0);
-            codes[24] = new OpCode("JSR", 4, 0);
-            codes[25] = new OpCode("RFS", 1, 0);
+            codes[24] = new OpCode("JSR", 4, 3);
+            codes[25] = new OpCode("RFS", 1, 2);
             codes[26] = new OpCode("JG", 6, 0);
             codes[27] = new OpCode("JL", 6, 0);
             codes[28] = new OpCode("JE", 6, 0);
@@ -82,8 +82,8 @@ namespace CpuSim4 {
             codes[54] = new OpCode("DIVI1", 3, 5);
             codes[55] = new OpCode("SEI", 1, 0);
             codes[56] = new OpCode("SDI", 1, 0);
-            codes[57] = new OpCode("INT", 2, 0);
-            codes[58] = new OpCode("RFI", 1, 0);
+            codes[57] = new OpCode("INT", 2, 4);
+            codes[58] = new OpCode("RFI", 1, 4);
             codes[59] = new OpCode("HLT", 1, 0);
             codes[60] = new OpCode("LDR1", 3, 0);
             codes[61] = new OpCode("STR1", 3, 0);
@@ -102,8 +102,8 @@ namespace CpuSim4 {
             codes[74] = new OpCode("OR", 4, 0);
             codes[75] = new OpCode("XOR", 4, 0);
             codes[76] = new OpCode("NOT", 2, 0);
-            codes[77] = new OpCode("CBT8", 2, 3);
-            codes[78] = new OpCode("C8TB", 2, 3);
+            codes[77] = new OpCode("CBT8", 2, 5);
+            codes[78] = new OpCode("C8TB", 2, 5);
 
             codes[79] = new OpCode("SJG", 4, 0);
             codes[80] = new OpCode("SJL", 4, 0);
