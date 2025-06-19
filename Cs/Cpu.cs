@@ -29,8 +29,8 @@ namespace CpuSim4 {
         public int[] registers;
         public float[] registersF;
 
-        public CacheLine[] cacheD;
-        public CacheLine[] cacheI;
+        public CacheSet[] cacheD;
+        public CacheSet[] cacheI;
 
         public long timeClockA = 0;
         public long timeClockB = 0;
@@ -59,8 +59,14 @@ namespace CpuSim4 {
             Reset();
         }
         public void Reset() {
-            cacheI = new CacheLine[256];
-            cacheD = new CacheLine[256];
+            cacheI = new CacheSet[128];
+            cacheD = new CacheSet[128];
+            for (int i = 0; i < cacheI.Length; i++) {
+                cacheI[i] = new CacheSet();
+            }
+            for (int i = 0; i < cacheD.Length; i++) {
+                cacheD[i] = new CacheSet();
+            }
 
             registers = new int[38];
             for (int i = 0; i < registers.Length; i++) {
@@ -167,10 +173,38 @@ namespace CpuSim4 {
 
         public PipelineStage Fetch() {
             int pc = registers[33];
+            PipelineStage ps = new PipelineStage { op = 22 };
+            byte opcode;
 
+            //try to load opcode
+            if (!ReadByteCache(pc, cacheI, out opcode)) {
+                // miss opcode
+                FetchCacheLine(pc, cacheI);
+                return ps; //nop
+            }
 
-            PipelineStage ps = new PipelineStage { };
+            int instrLen = opCodes[opcode].bytes;
+            ps.op = opcode;
+            ps.cyclesToExecute = (byte)(1 + opCodes[opcode].cycles);
+            //try to load other bytes
+            for (int i = 1; i < instrLen; i++) {
+                if (!ReadByteCache(pc + i, cacheI, out byte _)) {
+                    // miss other bytes
+                    FetchCacheLine(pc + i, cacheI);
+                    ps.op = 22;
+                    return ps;  //nop
+                }
+            }
+            //fetch instruction
+            ReadByteCache(pc, cacheI, out ps.op);
+            if (instrLen > 1) ReadByteCache(pc + 1, cacheI, out ps.arg1);
+            if (instrLen > 2) ReadByteCache(pc + 2, cacheI, out ps.arg2);
+            if (instrLen > 3) ReadByteCache(pc + 3, cacheI, out ps.arg3);
+            if (instrLen > 4) ReadByteCache(pc + 4, cacheI, out ps.arg4);
+            if (instrLen > 5) ReadByteCache(pc + 5, cacheI, out ps.arg5);
+            if (instrLen > 6) ReadByteCache(pc + 6, cacheI, out ps.arg6); 
 
+            registers[33] += instrLen;
             return ps;
         }
 
@@ -179,12 +213,71 @@ namespace CpuSim4 {
             if (ps.op == 22) {
                 return;
             }
+
+            //TODO:
+            ps.address2 = 0;
+            ps.address1 = 0;
+            ps.address0 = 0;
         }
 
         public void Execute(PipelineStage ps) {
             if (ps.op == 22) {
                 return;
             }
+        }
+
+
+        //Cache
+        public bool ReadByteCache(int address, CacheSet[] cache, out byte value) {
+            int offset = address & 0b111;
+            int index = (address >> 3) & 0x7F;
+            int tag = address >> 10;
+
+            var set = cache[index];
+            for (int i = 0; i < 2; i++) {
+                var line = set.lines[i];
+                if (line.valid && line.tag == tag) {
+                    value = line.data[offset];
+                    return true; 
+                }
+            }
+
+            value = 0;
+            return false; 
+        }
+
+        public void FetchCacheLine(int address, CacheSet[] cache) {
+            int alignedAddr = address & ~0b111;
+            int index = (address >> 3) & 0x7F;
+            int tag = address >> 10;
+
+            var set = cache[index];
+
+            Random rng = new Random();
+            int replaceIdx = -1;
+
+            for (int i = 0; i < 2; i++) {
+                if (!set.lines[i].valid) {
+                    replaceIdx = i;
+                    break;
+                }
+            }
+
+            if (replaceIdx == -1) {
+                replaceIdx = rng.Next(2);
+            }
+
+            var line = new CacheLine {
+                valid = true,
+                tag = tag,
+                data = new byte[8],
+            };
+
+            for (int i = 0; i < 8; i++) {
+                line.data[i] = Memory.Read(alignedAddr + i);
+            }
+                
+            set.lines[replaceIdx] = line;
         }
 
 
@@ -204,12 +297,11 @@ namespace CpuSim4 {
         public byte arg5;
         public byte arg6;
 
-        public int address3; //address +3
         public int address2; //address +2
         public int address1; //address +1
         public int address0; //address +0
 
-        public byte cyclesToExecute; //0=1
+        public byte cyclesToExecute; 
         public byte cyclesExecuted;
     }
 
@@ -218,6 +310,12 @@ namespace CpuSim4 {
         public int tag;
         public byte[] data;
     }
+
+    public class CacheSet {
+        public CacheLine[] lines = new CacheLine[2];
+    }
+
+
 
 }
 

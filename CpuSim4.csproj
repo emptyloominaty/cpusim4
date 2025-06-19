@@ -64,6 +64,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Cs\Cpu.cs" />
+    <Compile Include="Cs\Functions.cs" />
     <Compile Include="Cs\Memory.cs" />
     <Compile Include="Cs\OpCodes.cs" />
     <Compile Include="MainWindow.xaml.cs">
