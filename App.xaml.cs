@@ -13,6 +13,7 @@ namespace CpuSim4 {
     public partial class App : Application {
         public static Cpu cpu;
         public static OpCodes opCodes;
+        public static string cpuDebug;
 
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
@@ -20,9 +21,9 @@ namespace CpuSim4 {
             opCodes = new OpCodes();
 
             cpu = new Cpu(opCodes.codes);
+            cpu.StartCpu();
 
-            var mainWindow = new MainWindow();
-            mainWindow.Show();
+
         }
     }
 }

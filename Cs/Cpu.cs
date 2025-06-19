@@ -23,8 +23,8 @@ namespace CpuSim4 {
         public bool halted = false;
         public bool interruptHw = false;
 
-        public bool maxClock = true;
-        public long clockSet = 100000;
+        public bool maxClock = false;
+        public long clockSet = 1;
 
         public int[] registers;
         public float[] registersF;
@@ -52,7 +52,10 @@ namespace CpuSim4 {
         public int cyclesTotal = 0;
         public int cyclesExecuting = 0;
 
+        public bool debugCpu = true;
+
         public PipelineStage[] pipeline = new PipelineStage[3];
+        public bool pipelineStalled;
 
         public Cpu(OpCode[] opCodes) {
             this.opCodes = opCodes;
@@ -102,16 +105,18 @@ namespace CpuSim4 {
             pipeline[0] = new PipelineStage { op = 22 };
             pipeline[1] = new PipelineStage { op = 22 };
             pipeline[2] = new PipelineStage { op = 22 };
+            pipelineStalled = false;
         }
 
         public void StartCpu() {
+            Console.WriteLine("CPU STARTED");
             cpuThread = new Thread(new ThreadStart(Run));
             cpuThread.IsBackground = true;
             cpuThread.Start();
         }
 
         public void Run() {
-            
+         
             while (threadRunning) {
                 long timeClockWait = 1000000000 / clockSet;
                 while (cpuRunning) {
@@ -161,13 +166,15 @@ namespace CpuSim4 {
             cyclesExecuting++;
             cyclesDone++;
 
-
             Execute(pipeline[2]);
             Decode(pipeline[1]);
 
-            pipeline[2] = pipeline[1];
-            pipeline[1] = pipeline[0];
-            pipeline[0] = Fetch();
+            if (!pipelineStalled) {
+                pipeline[2] = pipeline[1];
+                pipeline[1] = pipeline[0];
+                pipeline[0] = Fetch();
+            }
+
         }
 
 
@@ -202,33 +209,145 @@ namespace CpuSim4 {
             if (instrLen > 3) ReadByteCache(pc + 3, cacheI, out ps.arg3);
             if (instrLen > 4) ReadByteCache(pc + 4, cacheI, out ps.arg4);
             if (instrLen > 5) ReadByteCache(pc + 5, cacheI, out ps.arg5);
-            if (instrLen > 6) ReadByteCache(pc + 6, cacheI, out ps.arg6); 
-
+            if (instrLen > 6) ReadByteCache(pc + 6, cacheI, out ps.arg6);
             registers[33] += instrLen;
-            return ps;
+
+            if (ps.op == 23 || ps.op == 24 || ps.op == 25 || ps.op == 57 || ps.op == 58) {
+                registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
+            } else if ((ps.op <= 26 && ps.op >= 33) || (ps.op >= 94 && ps.op <= 79)) {
+                //TODO: Branch Predict
+            }
+
+                return ps;
         }
 
 
         public void Decode(PipelineStage ps) {
-            if (ps.op == 22) {
-                return;
-            }
-
-            //TODO:
-            ps.address2 = 0;
-            ps.address1 = 0;
-            ps.address0 = 0;
+            //LoadRegisters() DONT (sim performance)
         }
 
         public void Execute(PipelineStage ps) {
+            if (debugCpu) {
+                Console.WriteLine(" PC:" + (registers[33]).ToString("X6") + " " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
+                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2]+" pipeline: "+ pipeline[0].op + " - " + pipeline[1].op + " - " + pipeline[2].op);
+                App.cpuDebug += " PC:" + (registers[33]).ToString("X6") + " " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
+                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " " + registers[3] + " " + registers[4]
+                    + " " + registers[5] + " " + registers[6] + " " + registers[7] + " " + registers[8] + " " + registers[9] + " " + registers[10]
+                    + " " + registers[11] + " " + registers[12] + " " + registers[13] + " " + registers[14] + " " + registers[15] + Environment.NewLine;
+            }
+            //TODO: +cycles = stall pipeline
+            //ps.cyclesToExecute ps.cyclesExecuted;
+
             if (ps.op == 22) {
                 return;
+            } else if (ps.op == 0) {
+                StopCpu();
             }
+            pipelineStalled = false;
+
+            int val;
+            int load;
+            byte[] store;
+            byte byte1;
+            byte byte2;
+            byte byte3;
+            byte byte4;
+            byte[] bytes;
+            int address1;
+            int address2;
+            int address3;
+            int address4;
+            int a;
+            int b;
+            uint ua;
+            uint ub;
+            uint uval;
+
+
+            switch (ps.op) {
+                case 1: //ADD
+                    a = registers[ps.arg1];
+                    b = registers[ps.arg2];
+                    val = a + b;
+                    registers[ps.arg3] = val;
+                    //carry
+                    ua = (uint)a;
+                    ub = (uint)b;
+                    uval = ua + ub;
+                    registers[35] = (uval < ua || uval < ub) ? 1 : 0;
+                    // overflow
+                    registers[36] = (((a ^ val) & (b ^ val)) < 0) ? 1 : 0;
+                    break;
+                case 2: //SUB
+                    a = registers[ps.arg1];
+                    b = registers[ps.arg2];
+                    val = a - b;
+                    registers[ps.arg3] = val;
+                    //carry
+                    registers[35] = ((uint)a >= (uint)b) ? 1 : 0;
+                    //overflow
+                    registers[36] = (((a ^ b) & (a ^ val)) < 0) ? 1 : 0;
+                    break;
+                case 3: //LD1
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    if (ReadByteCache(address1, cacheD, out byte1)) {
+                        registers[ps.arg1] = byte1;
+                    } else {
+                        //miss
+                        pipelineStalled = true;
+                        FetchCacheLine(address1, cacheD);
+                        return;
+                    }
+                    break;
+                case 4: //ST1
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    WriteByteCache(address1, cacheD, (byte)registers[ps.arg1]);
+                    break;
+
+
+
+
+
+
+                /*case 23: //JMP
+                    registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
+                    FlushPipeline();
+                    break;*/
+            }
+
+            instructionsDone++;
+        }
+
+        public void FlushPipeline() {
+            pipeline[1] = new PipelineStage { op = 22 };
+            pipeline[0] = new PipelineStage { op = 22 };
         }
 
 
         //Cache
+        public void WriteByteCache(int address, CacheSet[] cache, byte value) {
+            int offset = address & 0b111;
+            int index = (address >> 3) & 0x7F;
+            int tag = address >> 10;
+
+            var set = cache[index];
+            for (int i = 0; i < 2; i++) {
+                if (set.lines[i].valid && set.lines[i].tag == tag) {
+                    set.lines[i].data[offset] = value; 
+                    break;
+                }
+            }
+
+           Memory.Write(address,value); 
+        }
+
         public bool ReadByteCache(int address, CacheSet[] cache, out byte value) {
+            //uncached memory mapped I/O
+            if (address > 0x7FFFFF) {
+                value = Memory.Read(address);
+                return true;
+            }
+
             int offset = address & 0b111;
             int index = (address >> 3) & 0x7F;
             int tag = address >> 10;
@@ -296,10 +415,6 @@ namespace CpuSim4 {
         public byte arg4;
         public byte arg5;
         public byte arg6;
-
-        public int address2; //address +2
-        public int address1; //address +1
-        public int address0; //address +0
 
         public byte cyclesToExecute; 
         public byte cyclesExecuted;

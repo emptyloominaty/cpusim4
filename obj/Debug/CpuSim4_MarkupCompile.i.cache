@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\Adam.Biskupic\Desktop\1\2\3\CpuSim4\obj\Debug\
+D:\Projects\CpuSim4\obj\Debug\
 CpuSim4
 none
 false
 DEBUG;TRACE
-C:\Users\Adam.Biskupic\Desktop\1\2\3\CpuSim4\App.xaml
-1219584333
+D:\Projects\CpuSim4\App.xaml
+2-477461182
 
-10-1782041670
+11-194940363
 13-1310406943
-MainWindow.xaml;
+MainWindow.xaml;Views\DebugWindow.xaml;
 
-False
+True
 

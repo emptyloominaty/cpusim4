@@ -18,8 +18,12 @@ namespace CpuSim4 {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+
+        public DebugWindow debugWindow = new DebugWindow();
         public MainWindow() {
             InitializeComponent();
+            Application.Current.MainWindow = this;
+            debugWindow.Show();
         }
 
         private void ToggleCpu(object sender, RoutedEventArgs e) {
@@ -32,6 +36,18 @@ namespace CpuSim4 {
                 BtnCpuToggle.Content = "Stop";
             }
         }
+
+        private void Btn_Debug_Click(object sender, RoutedEventArgs e) {
+            if (debugWindow.IsVisible) {
+                debugWindow.Hide();
+            } else if (debugWindow.IsLoaded) {
+                debugWindow.Show();
+            } else {
+                debugWindow = new DebugWindow();
+                debugWindow.Show();
+            }
+        }
+
 
     }
 
