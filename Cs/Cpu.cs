@@ -166,8 +166,8 @@ namespace CpuSim4 {
             cyclesExecuting++;
             cyclesDone++;
 
-            Execute(pipeline[2]);
-            Decode(pipeline[1]);
+            Execute(ref pipeline[2]);
+            Decode(ref pipeline[1]);
 
             if (!pipelineStalled) {
                 pipeline[2] = pipeline[1];
@@ -192,7 +192,8 @@ namespace CpuSim4 {
 
             int instrLen = opCodes[opcode].bytes;
             ps.op = opcode;
-            ps.cyclesToExecute = (byte)(1 + opCodes[opcode].cycles);
+            ps.cyclesToExecute = opCodes[opcode].cycles;
+            ps.cyclesExecuted = 0;
             //try to load other bytes
             for (int i = 1; i < instrLen; i++) {
                 if (!ReadByteCache(pc + i, cacheI, out byte _)) {
@@ -218,25 +219,30 @@ namespace CpuSim4 {
                 //TODO: Branch Predict
             }
 
+            //prefetch next line
+            if (!ReadByteCache(pc + 8, cacheI, out byte _)) {
+                FetchCacheLine(pc + 8, cacheI);
+            }
                 return ps;
         }
 
 
-        public void Decode(PipelineStage ps) {
+        public void Decode(ref PipelineStage ps) {
             //LoadRegisters() DONT (sim performance)
         }
 
-        public void Execute(PipelineStage ps) {
+        public void Execute(ref PipelineStage ps) {
             if (debugCpu) {
-                Console.WriteLine(" PC:" + (registers[33]).ToString("X6") + " " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
-                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2]+" pipeline: "+ pipeline[0].op + " - " + pipeline[1].op + " - " + pipeline[2].op);
                 App.cpuDebug += " PC:" + (registers[33]).ToString("X6") + " " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
-                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " " + registers[3] + " " + registers[4]
-                    + " " + registers[5] + " " + registers[6] + " " + registers[7] + " " + registers[8] + " " + registers[9] + " " + registers[10]
-                    + " " + registers[11] + " " + registers[12] + " " + registers[13] + " " + registers[14] + " " + registers[15] + Environment.NewLine;
+                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " pipeline: " + opCodes[pipeline[0].op].name + " - " + opCodes[pipeline[1].op].name + " - " + opCodes[pipeline[2].op].name +" Stall: "+pipelineStalled+ Environment.NewLine;
             }
-            //TODO: +cycles = stall pipeline
-            //ps.cyclesToExecute ps.cyclesExecuted;
+
+            if (ps.cyclesToExecute!=ps.cyclesExecuted) {
+                ps.cyclesExecuted++;
+                pipelineStalled = true;
+                return;
+            }
+
 
             if (ps.op == 22) {
                 return;
@@ -341,11 +347,29 @@ namespace CpuSim4 {
            Memory.Write(address,value); 
         }
 
+        public byte deviceReadWait = 0;
+        public byte deviceReadWait2 = 0;
+        public bool deviceWait = false;
+
         public bool ReadByteCache(int address, CacheSet[] cache, out byte value) {
             //uncached memory mapped I/O
             if (address > 0x7FFFFF) {
-                value = Memory.Read(address);
-                return true;
+                value = 0;
+                if (!deviceWait) {
+                    deviceWait = true;
+                    deviceReadWait2 = 1;
+                }
+                if (deviceReadWait == deviceReadWait2) {
+                    deviceWait = false;
+                    value = Memory.Read(address);
+                    deviceReadWait2 = 0;
+                    deviceReadWait = 0;
+                    pipelineStalled = false;
+                } else {
+                    pipelineStalled = true;
+                    deviceReadWait++;
+                }
+                    return true;
             }
 
             int offset = address & 0b111;

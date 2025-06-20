@@ -24,6 +24,17 @@ namespace CpuSim4 {
             InitializeComponent();
             Application.Current.MainWindow = this;
             debugWindow.Show();
+
+            CompositionTarget.Rendering += Main;
+        }
+
+        public void Main(object sender, EventArgs e) {
+
+
+            if (debugWindow.IsLoaded) {
+                debugWindow.UpdateWindow();
+            }
+
         }
 
         private void ToggleCpu(object sender, RoutedEventArgs e) {
