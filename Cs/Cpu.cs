@@ -231,6 +231,9 @@ namespace CpuSim4 {
             //LoadRegisters() DONT (sim performance)
         }
 
+        byte[] store = new byte[4];
+        byte[] bytes = new byte[4];
+
         public void Execute(ref PipelineStage ps) {
             if (debugCpu) {
                 App.cpuDebug += " PC:" + (registers[33]).ToString("X6") + " " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
@@ -251,14 +254,13 @@ namespace CpuSim4 {
             }
             pipelineStalled = false;
 
+            bool success;
             int val;
             int load;
-            byte[] store;
             byte byte1;
             byte byte2;
             byte byte3;
             byte byte4;
-            byte[] bytes;
             int address1;
             int address2;
             int address3;
@@ -310,15 +312,118 @@ namespace CpuSim4 {
                     WriteByteCache(address1, cacheD, (byte)registers[ps.arg1]);
                     break;
 
+                case 5: //LD2
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    val = LoadBytes(address1, 2, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                    } else {
+                        return;
+                    }
 
+                    break;
+                case 6: //ST2
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    Functions.ConvertFrom16Bit(registers[ps.arg1],store);
+                    WriteByteCache(address1, cacheD, store[0]);
+                    WriteByteCache(address1+1, cacheD, store[1]);
+                    break;
 
+                case 7: //LD3
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    val = LoadBytes(address1, 3, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                    } else {
+                        return;
+                    }
 
+                    break;
+                case 8: //ST3
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    Functions.ConvertFrom24Bit(registers[ps.arg1], store);
+                    WriteByteCache(address1, cacheD, store[0]);
+                    WriteByteCache(address1 + 1, cacheD, store[1]);
+                    WriteByteCache(address1 + 2, cacheD, store[2]);
+                    break;
 
+                case 9: //LD4
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    val = LoadBytes(address1, 4, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                    } else {
+                        return;
+                    }
 
-                /*case 23: //JMP
+                    break;
+                case 10: //ST4
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    Functions.ConvertFrom32Bit(registers[ps.arg1], store);
+                    WriteByteCache(address1, cacheD, store[0]);
+                    WriteByteCache(address1 + 1, cacheD, store[1]);
+                    WriteByteCache(address1 + 2, cacheD, store[2]);
+                    WriteByteCache(address1 + 3, cacheD, store[3]);
+                    break;
+                case 11: //LDI1
+                    registers[ps.arg1] = ps.arg2;
+                    break;
+                case 12: //LDI2
+                    registers[ps.arg1] = Functions.ConvertTo16Bit(ps.arg2, ps.arg3);
+                    break;
+                case 13: //LDI3
+                    registers[ps.arg1] = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    break;
+                case 14: //LDI4
+                    registers[ps.arg1] = Functions.ConvertTo32Bit(ps.arg2, ps.arg3, ps.arg4, ps.arg5);
+                    break;
+                case 15: //INC
+                    registers[ps.arg1]++;
+                    break;
+                case 16: //DEC
+                    registers[ps.arg1]--;
+                    break;
+                case 17: //MUL
+                    val = registers[ps.arg1] * registers[ps.arg2];
+                    registers[ps.arg3] = val;
+                    break;
+                case 18: //DIV
+                    if (registers[ps.arg2] != 0) {
+                        val = registers[ps.arg1] / registers[ps.arg2];
+                    } else {
+                        val = 0;
+                    }
+                    registers[ps.arg3] = val;
+                    break;
+                case 19: //DIVR
+                    if (registers[ps.arg2] != 0) {
+                        val = registers[ps.arg1] % registers[ps.arg2];
+                    } else {
+                        val = 0;
+                    }
+                    registers[ps.arg3] = val;
+                    break;
+                case 20: //ADC
+                    val = registers[ps.arg1] + registers[ps.arg2];
+                    if (registers[35] == 1) {
+                        val++;
+                    }
+                    registers[ps.arg3] = val;
+                    //TODO: carry
+                    break;
+                case 21: //SUC
+                    val = registers[ps.arg1] - registers[ps.arg2];
+                    if (registers[35] == 1) {
+                        val--;
+                    }
+                    registers[ps.arg3] = val;
+                    break;
+                case 22: //NOP
+                    break;
+                case 23: //JMP
                     registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
                     FlushPipeline();
-                    break;*/
+                    break;
             }
 
             instructionsDone++;
@@ -331,6 +436,22 @@ namespace CpuSim4 {
 
 
         //Cache
+        public int LoadBytes(int baseAddress, int count, out bool success) {
+            int result = 0;
+            for (int i = 0; i < count; i++) {
+                if (ReadByteCache(baseAddress + i, cacheD, out byte b)) {
+                    result = (result << 8) | b;
+                } else {
+                    FetchCacheLine(baseAddress + i, cacheD);
+                    pipelineStalled = true;
+                    success = false;
+                    return 0;
+                }
+            }
+            success = true;
+            return result;
+        }
+
         public void WriteByteCache(int address, CacheSet[] cache, byte value) {
             int offset = address & 0b111;
             int index = (address >> 3) & 0x7F;
