@@ -36,18 +36,36 @@ namespace CpuSim4 {
             Write(7340038, 1, true);
             Write(7340039, 0x70, true);
             Write(7340040, 0, true);
-            Write(7340041, 2, true);
+            Write(7340041, 6, true);
 
-            Write(7340042, 1, true);
-            Write(7340043, 0, true);
-            Write(7340044, 1, true);
-            Write(7340045, 2, true);
+            Write(7340042, 15, true);
+            Write(7340043, 1, true);
 
-            Write(7340046, 23, true);
+            Write(7340044, 26, true);
+            Write(7340045, 0, true);
+            Write(7340046, 1, true);
             Write(7340047, 0x70, true);
             Write(7340048, 0x00, true);
             Write(7340049, 0x0A, true);
-     
+
+            Write(7340050, 24, true);
+            Write(7340051, 0x70, true);
+            Write(7340052, 0x00, true);
+            Write(7340053, 0x17, true);
+
+            Write(7340054, 0, true);
+
+            Write(7340055, 15, true);
+            Write(7340056, 0, true);
+
+            Write(7340057, 16, true);
+            Write(7340058, 0, true);
+
+            Write(7340059, 25, true);
+
+
+
+
         }
 
         public static byte Read(int address) {

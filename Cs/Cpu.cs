@@ -177,11 +177,15 @@ namespace CpuSim4 {
 
         }
 
-
+        bool fetchingStalled = false;
         public PipelineStage Fetch() {
             int pc = registers[33];
             PipelineStage ps = new PipelineStage { op = 22 };
             byte opcode;
+
+            if (fetchingStalled) {
+                return ps;
+            }
 
             //try to load opcode
             if (!ReadByteCache(pc, cacheI, out opcode)) {
@@ -213,9 +217,20 @@ namespace CpuSim4 {
             if (instrLen > 6) ReadByteCache(pc + 6, cacheI, out ps.arg6);
             registers[33] += instrLen;
 
-            if (ps.op == 23 || ps.op == 24 || ps.op == 25 || ps.op == 57 || ps.op == 58) {
+            if (ps.op == 23) { //JMP
                 registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
-            } else if ((ps.op <= 26 && ps.op >= 33) || (ps.op >= 94 && ps.op <= 79)) {
+            } else if (ps.op == 24) { //JSR
+                ps.returnAddress = registers[33];
+                registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
+            } else if (ps.op == 25 || ps.op == 58) { //RFS,RFI
+                fetchingStalled = true;
+            } else if (ps.op == 57 ) { //INT
+                fetchingStalled = true;
+            } else if (ps.op == 94) { //JMPR
+                fetchingStalled = true;
+            } else if (ps.op == 87) { //SJMP
+                registers[33] += ps.arg1;
+            } else if ((ps.op <= 26 && ps.op >= 33) || (ps.op >= 86 && ps.op <= 79) || (ps.op >= 93 && ps.op <= 88)) { //Conditional Jumps
                 //TODO: Branch Predict
             }
 
@@ -237,7 +252,7 @@ namespace CpuSim4 {
         public void Execute(ref PipelineStage ps) {
             if (debugCpu) {
                 App.cpuDebug += " PC:" + (registers[33]).ToString("X6") + " " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
-                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " pipeline: " + opCodes[pipeline[0].op].name + " - " + opCodes[pipeline[1].op].name + " - " + opCodes[pipeline[2].op].name +" Stall: "+pipelineStalled+ Environment.NewLine;
+                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " pipeline: " + opCodes[pipeline[0].op].name + " - " + opCodes[pipeline[1].op].name + " - " + opCodes[pipeline[2].op].name +" Stall: "+fetchingStalled+"/"+pipelineStalled+ Environment.NewLine;
             }
 
             if (ps.cyclesToExecute!=ps.cyclesExecuted) {
@@ -246,13 +261,13 @@ namespace CpuSim4 {
                 return;
             }
 
-
+            pipelineStalled = false;
             if (ps.op == 22) {
                 return;
             } else if (ps.op == 0) {
                 StopCpu();
             }
-            pipelineStalled = false;
+
 
             bool success;
             int val;
@@ -421,10 +436,40 @@ namespace CpuSim4 {
                 case 22: //NOP
                     break;
                 case 23: //JMP
-                    registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
-                    FlushPipeline();
+                    /*registers[33] = Functions.ConvertTo24Bit(ps.arg1, ps.arg2, ps.arg3);
+                    FlushPipeline();*/
+                    break;
+                case 24: //JSR
+                    Functions.ConvertFrom24Bit(ps.returnAddress, bytes); 
+                    WriteByteCache(registers[34], cacheD, bytes[0]);
+                    registers[34]++;
+                    WriteByteCache(registers[34], cacheD, bytes[1]);
+                    registers[34]++;
+                    WriteByteCache(registers[34], cacheD, bytes[2]);
+                    registers[34]++;
+                    break;
+                case 25: //RFS
+                    val = LoadBytes(registers[34], 3, out success);
+                    if (success) {
+                        registers[33] = val;
+                        registers[34] -= 3;
+                        fetchingStalled = false;
+                        pipelineStalled = true; //+1 cycle for fetch
+                        ps.op = 22; //fix for infinite stall
+                    } else {
+                        return;
+                    }
+                    break;
+                case 26: //JG
+                    if (registers[ps.arg1] > registers[ps.arg2]) {
+                        registers[33] = Functions.ConvertTo24Bit(ps.arg3, ps.arg4, ps.arg5);
+                        //TODO: Branch predict
+                        FlushPipeline();
+                    }
                     break;
             }
+
+
 
             instructionsDone++;
         }
@@ -560,6 +605,8 @@ namespace CpuSim4 {
         public byte arg4;
         public byte arg5;
         public byte arg6;
+
+        public int returnAddress;
 
         public byte cyclesToExecute; 
         public byte cyclesExecuted;
