@@ -49,8 +49,8 @@ namespace CpuSim4 {
             codes[21] = new OpCode("SUC", 4, 0);
             codes[22] = new OpCode("NOP", 1, 0);
             codes[23] = new OpCode("JMP", 4, 0);
-            codes[24] = new OpCode("JSR", 4, 3);
-            codes[25] = new OpCode("RFS", 1, 2);
+            codes[24] = new OpCode("JSR", 4, 0);
+            codes[25] = new OpCode("RFS", 1, 0);
             codes[26] = new OpCode("JG", 6, 0);
             codes[27] = new OpCode("JL", 6, 0);
             codes[28] = new OpCode("JE", 6, 0);

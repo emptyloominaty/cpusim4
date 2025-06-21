@@ -36,7 +36,7 @@ namespace CpuSim4 {
             Write(7340038, 1, true);
             Write(7340039, 0x70, true);
             Write(7340040, 0, true);
-            Write(7340041, 6, true);
+            Write(7340041, 1, true);
 
             Write(7340042, 15, true);
             Write(7340043, 1, true);

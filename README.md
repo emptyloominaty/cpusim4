@@ -1,7 +1,8 @@
 ## CPU
 * Architecture: **EMP 4 32-Bit**
-* 3-Stage Pipeline
 * **Load–store** architecture
+* 3-Stage Pipeline
+* **BTFNT** Branch prediction
 * ALU Width: **32-bit** 
 * FPU Width: **32-bit** 
 * Address Width: **24-bit**
@@ -11,6 +12,7 @@
 	- **2kB** Instruction Cache 
 	- **2kB** Data Cache
 	- **8B** cache line,  **2-way** set associative
+	
 
 * Registers: 
     - 32 32-Bit Registers (**r0-r31**)  <br/>
@@ -68,8 +70,8 @@ Reset Vector: 0x700000
 | 21 - SUC   |   1    |   4   |  -  | 0x15  |  reg  |   reg   |   reg   |    -    |   -   |
 | 22 - NOP   |   1    |   1   |  -  | 0x16  |   -   |    -    |    -    |    -    |   -   |
 | 23 - JMP   |   1    |   4   |  -  | 0x17  | mem2 |  mem1  |  mem0  |    -    |   -   |
-| 24 - JSR   |   4    |   4   |  -  | 0x18  | mem2 |  mem1  |  mem0  |    -    |   -   |
-| 25 - RFS   |   3    |   1   |  -  | 0x19  |   -   |    -    |    -    |    -    |   -   |
+| 24 - JSR   |   1    |   4   |  -  | 0x18  | mem2 |  mem1  |  mem0  |    -    |   -   |
+| 25 - RFS   |   1    |   1   |  -  | 0x19  |   -   |    -    |    -    |    -    |   -   |
 | 26 - JG    |   1    |   6   |  -  | 0x1a  |  reg  |   reg   |  mem2  |  mem1  | mem0 |
 | 27 - JL    |   1    |   6   |  -  | 0x1b  |  reg  |   reg   |  mem2  |  mem1  | mem0 | 
 | 28 - JE    |   1    |   6   |  -  | 0x1c  |  reg  |   reg   |  mem2  |  mem1  | mem0 |
@@ -139,15 +141,15 @@ Reset Vector: 0x700000
 | 92 - JNLR   |   1    |   4   |  -  | 0x5c  |  reg  |   reg   |  reg  |  -  | - |
 | 93 - JNER   |   1    |   4   |  -  | 0x5d  |  reg  |   reg   |  reg  |  -  | - |
 | 94 - JMPR   |   1    |   2   |  -  | 0x5e  | reg |  -  |  -  |    -    |   -   |
-| 100 - FLD   |   1    |   5   |  -  | 0x64  | reg |  mem2  |  mem1  |    mem0    |   -   |
-| 101 - FST   |   1    |   5   |  -  | 0x65  | reg |  mem2  |  mem1  |    mem0    |   -   |
-| 102 - FADD   |   3    |   4   |  -  | 0x66  | reg |  reg  |  reg  |    -    |   -   |
-| 103 - FSUB   |   3    |   4   |  -  | 0x67  | reg |  reg  |  reg  |    -    |   -   |
-| 104 - FMUL   |   20    |   4   |  -  | 0x68  | reg |  reg  |  reg  |    -    |   -   |
-| 105 - FDIV   |   36    |   4   |  -  | 0x69  | reg |  reg  |  reg  |    -    |   -   |
-| 106 - FIMOV   |   3    |   3   |  -  | 0x6a  | reg |  reg  |  -  |    -    |   -   |
-| 107 - IFMOV   |   3    |   3   |  -  | 0x6b  | reg |  reg  |  -  |    -    |   -   |
-
+| 100 - FLD   |   1    |   5   |  -  | 0x64  | reg[F] |  mem2  |  mem1  |    mem0    |   -   |
+| 101 - FST   |   1    |   5   |  -  | 0x65  | reg[F] |  mem2  |  mem1  |    mem0    |   -   |
+| 102 - FADD   |   3    |   4   |  -  | 0x66  | reg[F] |  reg[F]  |  reg[F]  |    -    |   -   |
+| 103 - FSUB   |   3    |   4   |  -  | 0x67  | reg[F] |  reg[F]  |  reg[F]  |    -    |   -   |
+| 104 - FMUL   |   20    |   4   |  -  | 0x68  | reg[F] |  reg[F]  |  reg[F]  |    -    |   -   |
+| 105 - FDIV   |   36    |   4   |  -  | 0x69  | reg[F] |  reg[F]  |  reg[F] |    -    |   -   |
+| 106 - FIMOV   |   3    |   3   |  -  | 0x6a  | reg[F] |  reg  |  -  |    -    |   -   |
+| 107 - IFMOV   |   3    |   3   |  -  | 0x6b  | reg |  reg[F]  |  -  |    -    |   -   |
+| 108 - FCOMP   |   6    |   4   |  -  | 0x6c  | reg[F] |  reg[F]  |  reg  |    -    |   -   |
 
 
 ### Interrupts
