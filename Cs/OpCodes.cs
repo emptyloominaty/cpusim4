@@ -82,8 +82,8 @@ namespace CpuSim4 {
             codes[54] = new OpCode("DIVI1", 3, 5);
             codes[55] = new OpCode("SEI", 1, 0);
             codes[56] = new OpCode("SDI", 1, 0);
-            codes[57] = new OpCode("INT", 2, 4);
-            codes[58] = new OpCode("RFI", 1, 4);
+            codes[57] = new OpCode("INT", 2, 2);
+            codes[58] = new OpCode("RFI", 1, 1);
             codes[59] = new OpCode("HLT", 1, 0);
             codes[60] = new OpCode("LDR1", 3, 0);
             codes[61] = new OpCode("STR1", 3, 0);

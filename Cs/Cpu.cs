@@ -23,6 +23,7 @@ namespace CpuSim4 {
 
         public bool halted = false;
         public bool interruptHw = false;
+        public int interruptId = 0;
 
         public bool maxClock = false;
         public long clockSet = 1;
@@ -87,6 +88,7 @@ namespace CpuSim4 {
                 registersF[i] = 0f;
             }
 
+            interruptId = 0;
             interruptHw = false;
             halted = false;
 
@@ -192,6 +194,13 @@ namespace CpuSim4 {
             byte opcode;
             opFetched = 22;
             if (fetchingStalled) {
+                return ps;
+            }
+
+            if (interruptHw) {
+                interruptHw = false;
+                ps.op = 57;
+                ps.arg1 = (byte)interruptId;
                 return ps;
             }
 
@@ -550,8 +559,206 @@ namespace CpuSim4 {
                     WriteByteCache(registers[34], cacheD, bytes[3]);
                     registers[34]++;
                     break;
+                case 38: //POP1
+                    val = LoadBytes(registers[34] - 1, 1, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                        registers[34] -= 1;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 39: //POP2
+                    val = LoadBytes(registers[34] - 2, 2, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                        registers[34] -= 2;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 40: //POP3
+                    val = LoadBytes(registers[34] - 3, 3, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                        registers[34] -= 3;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 41: //POP4
+                    val = LoadBytes(registers[34] - 4, 4, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                        registers[34] -= 4;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 42: //MOV
+                    registers[ps.arg2] = registers[ps.arg1];
+                    break;
+                case 43: //ADDE
+                    val = registers[ps.arg1] + registers[ps.arg2];
+                    registers[ps.arg1] = val;
+                    break;
+                case 44: //SUE
+                    val = registers[ps.arg1] - registers[ps.arg2];
+                    registers[ps.arg1] = val;
+                    break;
+                case 45: //ADDI1
+                    val = registers[ps.arg1] + ps.arg2;
+                    registers[ps.arg1] = val;
+                    break;
+                case 46: //ADDI2
+                    val = registers[ps.arg1] + Functions.ConvertTo16Bit(ps.arg2, ps.arg3);
+                    registers[ps.arg1] = val;
+                    break;
+                case 47: //ADDI3
+                    val = registers[ps.arg1] + Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    registers[ps.arg1] = val;
+                    break;
+                case 48: //ADDI4
+                    val = registers[ps.arg1] + Functions.ConvertTo32Bit(ps.arg2, ps.arg3, ps.arg4, ps.arg5);
+                    registers[ps.arg1] = val;
+                    break;
+                case 49: //SUBI1
+                    val = registers[ps.arg1] - ps.arg2;
+                    registers[ps.arg1] = val;
+                    break;
+                case 50: //SUBI2
+                    val = registers[ps.arg1] - Functions.ConvertTo16Bit(ps.arg2, ps.arg3);
+                    registers[ps.arg1] = val;
+                    break;
+                case 51: //SUBI3
+                    val = registers[ps.arg1] - Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    registers[ps.arg1] = val;
+                    break;
+                case 52: //SUBI4
+                    val = registers[ps.arg1] - Functions.ConvertTo32Bit(ps.arg2, ps.arg3, ps.arg4, ps.arg5);
+                    registers[ps.arg1] = val;
+                    break;
+                case 53: //MULI1
+                    val = registers[ps.arg1] * ps.arg2;
+                    registers[ps.arg1] = val;
+                    break;
+                case 54: //DIVI1
+                    if (registers[ps.arg2] != 0) {
+                        val = registers[ps.arg1] / ps.arg2;
+                    } else {
+                        val = 0;
+                    }
+                    registers[ps.arg1] = val;
+                    break;
+                case 55: //SEI
+                    registers[37] = 0;
+                    break;
+                case 56: //DEI
+                    registers[37] = 1;
+                    break;
+                case 57: //INT 
+                    //TODO: TEST
+                    if (registers[37] == 0) {
+                        return;
+                    }
+                    val = LoadBytes(ps.arg1 * 3, 3, out success);
+                    if (success) {
+                        Functions.ConvertFrom24Bit(registers[33], bytes);
+                        WriteByteCache(registers[34], cacheD, bytes[0]);
+                        registers[34]++;
+                        WriteByteCache(registers[34], cacheD, bytes[1]);
+                        registers[34]++;
+                        WriteByteCache(registers[34], cacheD, bytes[2]);
+                        registers[34]++;
 
+                        WriteByteCache(registers[34], cacheD, (byte)registers[35]);
+                        registers[34]++;
+                        WriteByteCache(registers[34], cacheD, (byte)registers[36]);
+                        registers[34]++;
 
+                        registers[33] = val;
+                    } else {
+                        return;
+                    }
+                    
+                    break;
+                case 58: //RFI
+                    //TODO:TEST
+                    val = LoadBytes(registers[34] - 1, 1, out success);
+                    if (success) {
+                        registers[34]--;
+                        registers[36] = val;
+                    }
+                    val = LoadBytes(registers[34] - 1, 1, out success);
+                    if (success) {
+                        registers[34]--;
+                        registers[35] = val;
+                    }
+                    val = LoadBytes(registers[34] - 3, 3, out success);
+                    if (success) {
+                        registers[34]-= 3;
+                        registers[33] = val;
+                    }
+                    break;
+                case 59: //HLT
+                    halted = true;
+                    registers[37] = 0;
+                    break;
+                case 60: //LDR1
+                    if (ReadByteCache(registers[ps.arg2], cacheD, out byte1)) {
+                        registers[ps.arg1] = byte1;
+                    } else {
+                        //miss
+                        pipelineStalled = true;
+                        FetchCacheLine(registers[ps.arg2], cacheD);
+                        return;
+                    }
+                    break;
+                case 61: //STR1
+                    WriteByteCache(registers[ps.arg2], cacheD, (byte)registers[ps.arg1]);
+                    break;
+                case 62: //LDR2
+                    val = LoadBytes(registers[ps.arg2], 2, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 63: //STR2
+                    Functions.ConvertFrom16Bit(registers[ps.arg1], store);
+                    WriteByteCache(registers[ps.arg2], cacheD, store[0]);
+                    WriteByteCache(registers[ps.arg2] + 1, cacheD, store[1]);
+                    break;
+                case 64: //LDR3
+                    val = LoadBytes(registers[ps.arg2], 3, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 65: //STR3
+                    Functions.ConvertFrom24Bit(registers[ps.arg1], store);
+                    WriteByteCache(registers[ps.arg2], cacheD, store[0]);
+                    WriteByteCache(registers[ps.arg2] + 1, cacheD, store[1]);
+                    WriteByteCache(registers[ps.arg2] + 2, cacheD, store[2]);
+                    break;
+                case 66: //LDR4
+                    val = LoadBytes(registers[ps.arg2], 4, out success);
+                    if (success) {
+                        registers[ps.arg1] = val;
+                    } else {
+                        return;
+                    }
+                    break;
+                case 67: //STR4
+                    Functions.ConvertFrom32Bit(registers[ps.arg1], store);
+                    WriteByteCache(registers[ps.arg2], cacheD, store[0]);
+                    WriteByteCache(registers[ps.arg2] + 1, cacheD, store[1]);
+                    WriteByteCache(registers[ps.arg2] + 2, cacheD, store[2]);
+                    WriteByteCache(registers[ps.arg2] + 2, cacheD, store[3]);
+                    break;
             }
 
 
@@ -684,7 +891,13 @@ namespace CpuSim4 {
             set.lines[replaceIdx] = line;
         }
 
-
+        public void Interrupt(byte id) {
+            if (registers[37] == 0) {
+                interruptHw = true;
+                interruptId = id;
+                halted = false;
+            }
+        }
 
         public void StopCpu() {
             cpuRunning = false;
