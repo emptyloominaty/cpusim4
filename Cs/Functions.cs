@@ -40,6 +40,16 @@ namespace CpuSim4 {
             return Convert.ToInt32(str, 16);
         }
 
+        public static void ConvertFloatToBytes(float value, byte[] output) {
+            int intBits = BitConverter.ToInt32(BitConverter.GetBytes(value), 0);
+            ConvertFrom32Bit(intBits, output);
+        }
+        public static float ConvertBytesToFloat(byte a, byte b, byte c, byte d) {
+            int intBits = ConvertTo32Bit(a, b, c, d);
+            return BitConverter.Int32BitsToSingle(intBits);
+        }
+
+
 
     }
 }

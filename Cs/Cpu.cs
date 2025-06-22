@@ -250,18 +250,12 @@ namespace CpuSim4 {
                 registers[33] += ps.arg1;
             } else if ((ps.op >= 26 && ps.op <= 33)) { //Conditional jumps
                 int jumpAddress = Functions.ConvertTo24Bit(ps.arg3, ps.arg4, ps.arg5);
-                if (jumpAddress > registers[33]) {
-                    ps.branchTaken = false;
-                } else {
-                    ps.returnAddress = registers[33];
-                    registers[33] = jumpAddress;
-                    ps.branchTaken = true;
-                }
+                PredictBranch(ref ps, jumpAddress);
             } else if (ps.op >= 88 && ps.op <= 93) { //Indirect conditional jumps
                 fetchingStalled = true;
             } else if (ps.op >= 79 && ps.op <= 86) { //Short conditional jumps
-                //TODO:
-                fetchingStalled = true;
+                int jumpAddress = registers[33] + ps.arg3 - 128;
+                PredictBranch(ref ps, jumpAddress);
             }
 
             //prefetch next line
@@ -270,7 +264,6 @@ namespace CpuSim4 {
             }
                 return ps;
         }
-
 
         public void Decode(ref PipelineStage ps) {
             //LoadRegisters() DONT (sim performance)
@@ -298,21 +291,16 @@ namespace CpuSim4 {
 
             bool success;
             int val;
-            int load;
             byte byte1;
-            byte byte2;
-            byte byte3;
-            byte byte4;
             int address1;
-            int address2;
-            int address3;
-            int address4;
             int a;
             int b;
             uint ua;
             uint ub;
             uint uval;
             long temp;
+            float fa;
+            float fb;
 
 
             switch (ps.op) {
@@ -759,11 +747,231 @@ namespace CpuSim4 {
                     WriteByteCache(registers[ps.arg2] + 2, cacheD, store[2]);
                     WriteByteCache(registers[ps.arg2] + 2, cacheD, store[3]);
                     break;
+                case 68: //ROL
+                    val = (registers[ps.arg1] << 1) | (registers[ps.arg1] >> (32 - 1));
+                    registers[ps.arg1] = val;
+                    break;
+                case 69: //ROR
+                    val = (registers[ps.arg1] >> 1) | (registers[ps.arg1] << (32 - 1));
+                    registers[ps.arg1] = val;
+                    break;
+                case 70: //SLL
+                    val = registers[ps.arg1];
+                    App.cpu.registers[35] = (val & 0x80000000) != 0 ? 1 : 0;
+                    registers[ps.arg1] = val << 1;
+                    break;
+                case 71: //SLR
+                    val = registers[ps.arg1];
+                    App.cpu.registers[35] = (val & 0x00000001) != 0 ? 1 : 0;
+                    registers[ps.arg1] = (int)((uint)val >> 1);
+                    break;
+                case 72: //SAR
+                    val = registers[ps.arg1] >> 1;
+                    registers[ps.arg1] = val;
+                    break;
+                case 73: //AND
+                    val = registers[ps.arg1] & registers[ps.arg2];
+                    registers[ps.arg3] = val;
+                    break;
+                case 74: //OR
+                    val = registers[ps.arg1] | registers[ps.arg2];
+                    registers[ps.arg3] = val;
+                    break;
+                case 75: //XOR
+                    val = registers[ps.arg1] ^ registers[ps.arg2];
+                    registers[ps.arg3] = val;
+                    break;
+                case 76: //NOT
+                    val = ~registers[ps.arg1];
+                    registers[ps.arg1] = val;
+                    break;
+                case 77: //CBT8
+                    val = registers[ps.arg1];
+                    registers[ps.arg1] = val & 0x01;
+                    registers[ps.arg1 + 1] = (val >> 1) & 0x01;
+                    registers[ps.arg1 + 2] = (val >> 2) & 0x01;
+                    registers[ps.arg1 + 3] = (val >> 3) & 0x01;
+                    registers[ps.arg1 + 4] = (val >> 4) & 0x01;
+                    registers[ps.arg1 + 5] = (val >> 5) & 0x01;
+                    registers[ps.arg1 + 6] = (val >> 6) & 0x01;
+                    registers[ps.arg1 + 7] = (val >> 7) & 0x01;
+                    break;
+                case 78: //C8TB
+                    val = registers[ps.arg1];
+                    val |= registers[ps.arg1 + 1] << 1;
+                    val |= registers[ps.arg1 + 2] << 2;
+                    val |= registers[ps.arg1 + 3] << 3;
+                    val |= registers[ps.arg1 + 4] << 4;
+                    val |= registers[ps.arg1 + 5] << 5;
+                    val |= registers[ps.arg1 + 6] << 6;
+                    val |= registers[ps.arg1 + 7] << 7;
+                    registers[ps.arg1] = val;
+                    break;
+                case 79: //SJG  
+                    success = registers[ps.arg1] > registers[ps.arg2];
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 80: //SJL  
+                    success = registers[ps.arg1] < registers[ps.arg2];
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 81: //SJE  
+                    success = registers[ps.arg1] == registers[ps.arg2];
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 82: //SJC
+                    success = registers[35] == 1;
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 83: //SJNG
+                    success = !(registers[ps.arg1] > registers[ps.arg2]);
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 84: //SJNL
+                    success = !(registers[ps.arg1] < registers[ps.arg2]);
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 85: //SJNE
+                    success = !(registers[ps.arg1] == registers[ps.arg2]);
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 86: //SJNC
+                    success = registers[35] == 0;
+                    ConditionalJump(ref ps, success);
+                    break;
+                case 87: //SJMP
+                    break;
+                case 88: //JGR
+                    if (registers[ps.arg1] > registers[ps.arg2]) {
+                        registers[33] = registers[ps.arg3];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 89: //JLR
+                    if (registers[ps.arg1] < registers[ps.arg2]) {
+                        registers[33] = registers[ps.arg3];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 90: //JER
+                    if (registers[ps.arg1] == registers[ps.arg2]) {
+                        registers[33] = registers[ps.arg3];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 91: //JNGR
+                    if (!(registers[ps.arg1] > registers[ps.arg2])) {
+                        registers[33] = registers[ps.arg3];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 92: //JNLR
+                    if (!(registers[ps.arg1] < registers[ps.arg2])) {
+                        registers[33] = registers[ps.arg3];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 93: //JNER
+                    if (!(registers[ps.arg1] == registers[ps.arg2])) {
+                        registers[33] = registers[ps.arg3];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 94: //JMPR
+                    registers[33] = registers[ps.arg1];
+                    fetchingStalled = false;
+                    break;
+                case 95: //JCR
+                    if (registers[35] == 1) {
+                        registers[33] = registers[ps.arg1];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 96: //JNCR
+                    if (registers[35] == 0) {
+                        registers[33] = registers[ps.arg1];
+                    }
+                    fetchingStalled = false;
+                    break;
+                case 97: //BT
+                    registers[35] = (registers[ps.arg1] >> ps.arg2) & 1;
+                    break;
+                case 98: //BTS
+                    registers[35] = (registers[ps.arg1] >> ps.arg2) & 1;
+                    registers[ps.arg1] = registers[ps.arg1] | (1 << ps.arg2);
+                    break;
+                case 99: //BTR
+                    registers[35] = (registers[ps.arg1] >> ps.arg2) & 1;
+                    registers[ps.arg1] = registers[ps.arg1] & ~(1 << ps.arg2);
+                    break;
+                case 100: //FLD
+                    byte1 = GetFPRegister(ps.arg1);
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    val = LoadBytes(address1, 4, out success);
+                    if (success) {
+                        registersF[byte1] = (float)(val);
+                    } else {
+                        return;
+                    }
+                    break;
+                case 101: //FST
+                    byte1 = GetFPRegister(ps.arg1);
+                    address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
+                    Functions.ConvertFloatToBytes(registersF[byte1], store);
+                    WriteByteCache(address1, cacheD, store[0]);
+                    WriteByteCache(address1 + 1, cacheD, store[1]);
+                    WriteByteCache(address1 + 2, cacheD, store[2]);
+                    WriteByteCache(address1 + 3, cacheD, store[3]);
+                    break;
+                case 102: //FADD
+                    registersF[GetFPRegister(ps.arg3)] = registersF[GetFPRegister(ps.arg1)] + registersF[GetFPRegister(ps.arg2)];
+                    break;
+                case 103: //FSUB
+                    registersF[GetFPRegister(ps.arg3)] = registersF[GetFPRegister(ps.arg1)] - registersF[GetFPRegister(ps.arg2)];
+                    break;
+                case 104: //FMUL
+                    registersF[GetFPRegister(ps.arg3)] = registersF[GetFPRegister(ps.arg1)] * registersF[GetFPRegister(ps.arg2)];
+                    break;
+                case 105: //FDIV
+                    fa = registersF[GetFPRegister(ps.arg1)];
+                    fb = registersF[GetFPRegister(ps.arg2)];
+
+                    if (fb != 0) {
+                        registersF[GetFPRegister(ps.arg3)] = fa / fb;
+                    } else {
+                        registersF[GetFPRegister(ps.arg3)] = 0;
+                    }
+                    break;
+                case 106: //FIMOV
+                    registers[ps.arg2] = (int)(registersF[GetFPRegister(ps.arg1)]);
+                    break;
+                case 107: //IFMOV
+                    registersF[GetFPRegister(ps.arg2)] = (float)(registers[ps.arg1]);
+                    break;
+                case 108: //FCOMP
+                    fa = registersF[GetFPRegister(ps.arg1)];
+                    fb = registersF[GetFPRegister(ps.arg2)];
+                    if (fa > fb) {
+                        registers[ps.arg3] = 1;
+                    } else if (fa < fb) {
+                        registers[ps.arg3] = -1;
+                    } else {
+                        registers[ps.arg3] = 0;
+                    }
+                    break;
+
             }
 
 
 
             instructionsDone++;
+        }
+
+        public byte GetFPRegister(byte input) {
+            if (input>=64 && input<=95) {
+                return (byte)(input - 64);
+            }
+            return 0;
         }
 
         public void ConditionalJump(ref PipelineStage ps, bool success) {  
@@ -779,6 +987,16 @@ namespace CpuSim4 {
         public void FlushPipeline() {
             pipeline[1] = new PipelineStage { op = 22 };
             pipeline[0] = new PipelineStage { op = 22 };
+        }
+
+        public void PredictBranch(ref PipelineStage ps, int jumpAddress) {
+            if (jumpAddress > registers[33]) {
+                ps.branchTaken = false;
+            } else {
+                ps.returnAddress = registers[33];
+                registers[33] = jumpAddress;
+                ps.branchTaken = true;
+            }
         }
 
 

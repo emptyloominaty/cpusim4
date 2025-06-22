@@ -97,7 +97,7 @@ namespace CpuSim4 {
             codes[69] = new OpCode("ROR", 2, 0);
             codes[70] = new OpCode("SLL", 2, 0);
             codes[71] = new OpCode("SLR", 2, 0);
-            codes[72] = new OpCode("SRR", 2, 0);
+            codes[72] = new OpCode("SAR", 2, 0);
             codes[73] = new OpCode("AND", 4, 0);
             codes[74] = new OpCode("OR", 4, 0);
             codes[75] = new OpCode("XOR", 4, 0);

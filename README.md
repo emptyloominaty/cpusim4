@@ -118,7 +118,7 @@ Reset Vector: 0x700000
 | 69 - ROR   |   1    |   2   |  -  | 0x45  |  reg  |    -    |    -    |    -    |   -   |
 | 70 - SLL   |   1    |   2   |  -  | 0x46  |  reg  |    -    |    -    |    -    |   -   |
 | 71 - SLR   |   1    |   2   |  -  | 0x47  |  reg  |    -    |    -    |    -    |   -   |
-| 72 - SRR   |   1    |   2   |  -  | 0x48  |  reg  |    -    |    -    |    -    |   -   |
+| 72 - SAR   |   1    |   2   |  -  | 0x48  |  reg  |    -    |    -    |    -    |   -   |
 | 73 - AND   |   1    |   4   |  -  | 0x49  |  reg  |   reg   |   reg   |    -    |   -   |
 | 74 - OR    |   1    |   4   |  -  | 0x4a  |  reg  |   reg   |   reg   |    -    |   -   |
 | 75 - XOR   |   1    |   4   |  -  | 0x4b  |  reg  |   reg   |   reg   |    -    |   -   |
@@ -141,6 +141,11 @@ Reset Vector: 0x700000
 | 92 - JNLR   |   1    |   4   |  -  | 0x5c  |  reg  |   reg   |  reg  |  -  | - |
 | 93 - JNER   |   1    |   4   |  -  | 0x5d  |  reg  |   reg   |  reg  |  -  | - |
 | 94 - JMPR   |   1    |   2   |  -  | 0x5e  | reg |  -  |  -  |    -    |   -   |
+| 95 - JCR    |   1    |   2   |  -  | 0x5f  | reg |  -  |  -  |    -    |   -   |
+| 96 - JNCR   |   1    |   2   |  -  | 0x60  | reg |  -  |  -  |    -    |   -   |
+| 97 - BT    |   1    |   3   |  -  | 0x61  | reg |  bit  |  -  |    -    |   -   |
+| 98 - BTS   |   1    |   3   |  -  | 0x62  | reg |  bit  |  -  |    -    |   -   |
+| 99 - BTR   |   1    |   3   |  -  | 0x63  | reg |  bit  |  -  |    -    |   -   |
 | 100 - FLD   |   1    |   5   |  -  | 0x64  | reg[F] |  mem2  |  mem1  |    mem0    |   -   |
 | 101 - FST   |   1    |   5   |  -  | 0x65  | reg[F] |  mem2  |  mem1  |    mem0    |   -   |
 | 102 - FADD   |   3    |   4   |  -  | 0x66  | reg[F] |  reg[F]  |  reg[F]  |    -    |   -   |
