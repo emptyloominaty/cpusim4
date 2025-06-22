@@ -14,6 +14,7 @@ namespace CpuSim4 {
         public static Cpu cpu;
         public static OpCodes opCodes;
         public static string cpuDebug;
+        public static string assemblerDebug;
 
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);

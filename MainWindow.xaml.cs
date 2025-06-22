@@ -1,6 +1,9 @@
-﻿using System;
+﻿using CpuSim3;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,20 +23,36 @@ namespace CpuSim4 {
     public partial class MainWindow : Window {
 
         public DebugWindow debugWindow = new DebugWindow();
+        public MemoryViewer memoryViewerWindow = new MemoryViewer();
         public MainWindow() {
             InitializeComponent();
             Application.Current.MainWindow = this;
-            debugWindow.Show();
+            //debugWindow.Show();
+            //memoryViewerWindow.Show();
 
             CompositionTarget.Rendering += Main;
         }
 
         public void Main(object sender, EventArgs e) {
+            Cpu cpu = App.cpu;
 
+            if (memoryViewerWindow.IsLoaded) {
+                memoryViewerWindow.UpdateWindow();
+            }
 
             if (debugWindow.IsLoaded) {
                 debugWindow.UpdateWindow();
             }
+
+            SP_Text.Text = "SP: " + cpu.registers[34].ToString("X6") + " (" + Math.Round(((cpu.registers[34] - 8192.0) / 8192) * 100, 1) + "%)";
+            PC_Text.Text = "PC: " + cpu.registers[33].ToString("X6");
+
+            Running.Text = "Running: " + cpu.cpuRunning;
+            Clock_Text.Text = Functions.FormatClock(cpu.clock);
+            IPC_Text.Text = "IPC: " + Math.Round(cpu.instructionsDone / (cpu.cyclesDone + 1.0), 2);
+            Instructions_Done_Text.Text = "Instructions Done: " + cpu.instructionsDone;
+            Cycles_Done_Text.Text = "Cycles Done: " + cpu.cyclesDone;
+
 
         }
 
@@ -47,15 +66,38 @@ namespace CpuSim4 {
                 BtnCpuToggle.Content = "Stop";
             }
         }
+        private void Btn_LoadASM(object sender, RoutedEventArgs e) {
+            Assembler.Assemble(CodeEditor.Text, App.opCodes);
+        }
+
+        private void Btn_LoadMC(object sender, RoutedEventArgs e) {
+            Assembler.LoadMachineCode(CodeEditor.Text);
+        }
+
+        private void Btn_Interrupt(object sender, RoutedEventArgs e) {
+            int result = 0;
+            if (int.TryParse(TextBox_Interrupt.Text, out result)) {
+                App.cpu.Interrupt(byte.Parse(TextBox_Interrupt.Text));
+            }
+        }
 
         private void Btn_Debug_Click(object sender, RoutedEventArgs e) {
-            if (debugWindow.IsVisible) {
-                debugWindow.Hide();
-            } else if (debugWindow.IsLoaded) {
-                debugWindow.Show();
+            ToggleWindow(ref debugWindow);
+        }
+
+        private void Btn_MemoryViewer_Click(object sender, RoutedEventArgs e) {
+            ToggleWindow(ref memoryViewerWindow);
+        }
+
+
+        private void ToggleWindow<T>(ref T window) where T : Window, new() {
+            if (window != null && window.IsVisible) {
+                window.Hide();
+            } else if (window != null && window.IsLoaded) {
+                window.Show();
             } else {
-                debugWindow = new DebugWindow();
-                debugWindow.Show();
+                window = new T();
+                window.Show();
             }
         }
 

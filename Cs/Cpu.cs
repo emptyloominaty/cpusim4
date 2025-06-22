@@ -25,8 +25,8 @@ namespace CpuSim4 {
         public bool interruptHw = false;
         public int interruptId = 0;
 
-        public bool maxClock = false;
-        public long clockSet = 1;
+        public bool maxClock = true;
+        public long clockSet = 2;
 
         public int[] registers;
         public float[] registersF;
@@ -54,7 +54,7 @@ namespace CpuSim4 {
         public int cyclesTotal = 0;
         public int cyclesExecuting = 0;
 
-        public bool debugCpu = true;
+        public bool debugCpu = false;
 
         public PipelineStage[] pipeline = new PipelineStage[3];
         public bool pipelineStalled;
@@ -477,8 +477,7 @@ namespace CpuSim4 {
                         registers[33] = val;
                         registers[34] -= 3;
                         fetchingStalled = false;
-                        pipelineStalled = true; //+1 cycle for fetch
-                        ps.op = 22; //fix for infinite stall
+                        //ps.op = 22; //fix for infinite stall
                     } else {
                         return;
                     }
@@ -786,6 +785,9 @@ namespace CpuSim4 {
                     registers[ps.arg1] = val;
                     break;
                 case 77: //CBT8
+                    if (ps.arg1 > 24) {
+                        return;
+                    }
                     val = registers[ps.arg1];
                     registers[ps.arg1] = val & 0x01;
                     registers[ps.arg1 + 1] = (val >> 1) & 0x01;
@@ -797,6 +799,9 @@ namespace CpuSim4 {
                     registers[ps.arg1 + 7] = (val >> 7) & 0x01;
                     break;
                 case 78: //C8TB
+                    if (ps.arg1 > 24) {
+                        return;
+                    }
                     val = registers[ps.arg1];
                     val |= registers[ps.arg1 + 1] << 1;
                     val |= registers[ps.arg1 + 2] << 2;

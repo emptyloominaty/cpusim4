@@ -24,7 +24,7 @@
     - Interrupt Disabled  (**r37**)
 	- 32 32-bit Floating Point Registers (**r64-r95**)
     <br/>
-* IPC: ****
+* IPC: **0.68**
 * Stack: **8192 Bytes**
 
         
@@ -168,3 +168,7 @@ Reset Vector: 0x700000
 # Memory
 * 4MB RAM
 * 4MB ROM
+
+## Max Clock(sim)
+* on Amd Ryzen 9 5900x
+    -  **4.2** MHz

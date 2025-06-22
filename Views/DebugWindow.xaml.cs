@@ -24,7 +24,7 @@ namespace CpuSim4 {
 
         public void UpdateWindow() {
             CpuDebug.Text = App.cpuDebug;
-            //AssemblerDebug.Text = GlobalVars.assemblerDebug;
+            AssemblerDebug.Text = App.assemblerDebug;
             if (scrollToEnd) {
                 CpuDebug.ScrollToEnd();
             }

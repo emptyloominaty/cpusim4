@@ -40,6 +40,20 @@ namespace CpuSim4 {
             return Convert.ToInt32(str, 16);
         }
 
+        public static bool IsNumeric(string str) {
+            double result;
+            return double.TryParse(str, out result);
+        }
+        public static string FormatClock(long clock) {
+            if (clock > 1000000) {
+                return ((double)Math.Round((clock / 1000000.0) * 10) / 10) + "MHz";
+            } else if (clock > 1000) {
+                return ((double)Math.Round((clock / 1000.0) * 10) / 10) + "kHz";
+            } else {
+                return clock + "Hz";
+            }
+        }
+
         public static void ConvertFloatToBytes(float value, byte[] output) {
             int intBits = BitConverter.ToInt32(BitConverter.GetBytes(value), 0);
             ConvertFrom32Bit(intBits, output);
