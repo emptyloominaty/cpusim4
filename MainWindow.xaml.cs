@@ -1,5 +1,4 @@
-﻿using CpuSim3;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -24,12 +23,10 @@ namespace CpuSim4 {
 
         public DebugWindow debugWindow = new DebugWindow();
         public MemoryViewer memoryViewerWindow = new MemoryViewer();
+        public CacheViewer cacheViewerWindow = new CacheViewer();
         public MainWindow() {
             InitializeComponent();
             Application.Current.MainWindow = this;
-            //debugWindow.Show();
-            //memoryViewerWindow.Show();
-
             CompositionTarget.Rendering += Main;
         }
 
@@ -38,6 +35,10 @@ namespace CpuSim4 {
 
             if (memoryViewerWindow.IsLoaded) {
                 memoryViewerWindow.UpdateWindow();
+            }
+
+            if (cacheViewerWindow.IsLoaded) {
+                cacheViewerWindow.UpdateWindow();
             }
 
             if (debugWindow.IsLoaded) {
@@ -54,6 +55,10 @@ namespace CpuSim4 {
             Cycles_Done_Text.Text = "Cycles Done: " + cpu.cyclesDone;
 
 
+            PS_Stalled_Text.Text = "Fetch|Execute Stalled: " + (cpu.fetchingStalled ? "Y" : "N") + " | " + (cpu.pipelineStalled ? "Y" : "N") + " ";
+            PS_Text.Text = "1. " + App.opCodes.codes[cpu.pipeline[0].op].name+" ";
+            PS_Text2.Text = "2. " + App.opCodes.codes[cpu.pipeline[1].op].name + " ";
+            PS_Text3.Text = "3. " + App.opCodes.codes[cpu.pipeline[2].op].name + " ";
         }
 
         private void ToggleCpu(object sender, RoutedEventArgs e) {
@@ -88,6 +93,9 @@ namespace CpuSim4 {
         private void Btn_MemoryViewer_Click(object sender, RoutedEventArgs e) {
             ToggleWindow(ref memoryViewerWindow);
         }
+        private void Btn_CacheViewer_Click(object sender, RoutedEventArgs e) {
+            ToggleWindow(ref cacheViewerWindow);
+        }
 
 
         private void ToggleWindow<T>(ref T window) where T : Window, new() {
@@ -101,6 +109,18 @@ namespace CpuSim4 {
             }
         }
 
+        private void Clock_TextChanged(object sender, TextChangedEventArgs e) {
+            if (sender is TextBox textBox && App.cpu != null) {
+                if (long.TryParse(textBox.Text, out long number)) {
+                    App.cpu.clockSet = number;
+                    if (number > 10000000) {
+                        App.cpu.maxClock = true;
+                    } else {
+                        App.cpu.maxClock = false;
+                    }
+                }
+            }
+        }
 
     }
 

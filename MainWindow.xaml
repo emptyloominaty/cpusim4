@@ -8,25 +8,76 @@
         Title="MainWindow" Height="900" Width="1600"
         Background="#333333">
     <Grid>
-        <Button Name="BtnCpuToggle" Click="ToggleCpu" Content="Start" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top"/>
-        <Button Name="Btn_Debug" Content="Debug" HorizontalAlignment="Left" Margin="201,812,0,0" VerticalAlignment="Top" Click="Btn_Debug_Click" />
+        <Button Name="BtnCpuToggle" Click="ToggleCpu" Content="Start" HorizontalAlignment="Left" Margin="154,21,0,0" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Margin="20,21,0,0" TextWrapping="Wrap" Text="1000000" VerticalAlignment="Top" Width="120" TextChanged="Clock_TextChanged"/>
+
+        <Button Name="Btn_Debug" Content="Debug" HorizontalAlignment="Left" Margin="312,812,0,0" VerticalAlignment="Top" Click="Btn_Debug_Click" />
         <Button Name="Btn_MemoryViewer" Content="Memory Viewer" HorizontalAlignment="Left" Margin="46,812,0,0" VerticalAlignment="Top" Click="Btn_MemoryViewer_Click" RenderTransformOrigin="0.511,0.45"/>
+        <Button Name="Btn_CacheViewer" Content="Cache Viewer" HorizontalAlignment="Left" Margin="184,812,0,0" VerticalAlignment="Top" Click="Btn_CacheViewer_Click" RenderTransformOrigin="0.511,0.45"/>
 
         <TextBox Name="CodeEditor"  Margin="80,250,0,0" TextWrapping="Wrap" Text="" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450" Height="502" Grid.RowSpan="2"/>
         <Button Content="Load ASM Code" HorizontalAlignment="Left" Margin="615,825,0,0" VerticalAlignment="Top" RenderTransformOrigin="0,0" Click="Btn_LoadASM"/>
         <Button Content="Load Machine Code" HorizontalAlignment="Left" Margin="893,825,0,0" VerticalAlignment="Top" RenderTransformOrigin="0,0" Click="Btn_LoadMC"/>
 
-        <TextBox HorizontalAlignment="Left" Margin="1195,0,0,49" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="120" Name="TextBox_Interrupt" RenderTransformOrigin="0.504,0.512"/>
-        <Button Name="BtnInterrupt" Content="Interrupt" HorizontalAlignment="Left" Margin="1320,0,0,47" Click="Btn_Interrupt" VerticalAlignment="Bottom"/>
+        <TextBox HorizontalAlignment="Left" Margin="46,0,0,129" TextWrapping="Wrap" Text="0" VerticalAlignment="Bottom" Width="120" Name="TextBox_Interrupt" RenderTransformOrigin="0.504,0.512"/>
+        <Button Name="BtnInterrupt" Content="Interrupt" HorizontalAlignment="Left" Margin="181,0,0,129" Click="Btn_Interrupt" VerticalAlignment="Bottom"/>
 
-        <TextBlock Name="Running" HorizontalAlignment="Left" Margin="121,32,0,689" TextWrapping="Wrap" Text="Running: "/>
-        <TextBlock Name="PC_Text" HorizontalAlignment="Left" Margin="20,240,0,492" TextWrapping="Wrap" Text="PC: "/>
-        <TextBlock Name="SP_Text" HorizontalAlignment="Left" Margin="154,240,0,492" TextWrapping="Wrap" Text="SP: "/>
+        <TextBlock Name="Running" HorizontalAlignment="Left" Margin="218,21,0,699" TextWrapping="Wrap" Text="Running: "/>
+        <TextBlock Name="PC_Text" HorizontalAlignment="Left" Margin="20,154,0,578" TextWrapping="Wrap" Text="PC: "/>
+        <TextBlock Name="SP_Text" HorizontalAlignment="Left" Margin="154,154,0,578" TextWrapping="Wrap" Text="SP: "/>
 
-        <TextBlock Name="Clock_Text" HorizontalAlignment="Left" Margin="80,140,0,680" TextWrapping="Wrap" Text="0"/>
+        <TextBlock Name="Clock_Text" HorizontalAlignment="Left" Margin="410,21,0,799" TextWrapping="Wrap" Text="0" Width="137"/>
 
         <TextBlock Name="IPC_Text" HorizontalAlignment="Left" Margin="20,60,0,669" TextWrapping="Wrap" Text="IPC:"/>
         <TextBlock Name="Instructions_Done_Text" HorizontalAlignment="Left" Margin="20,85,0,662" TextWrapping="Wrap" Text="Instructions Done:"/>
         <TextBlock Name="Cycles_Done_Text" HorizontalAlignment="Left" Margin="20,110,0,623" TextWrapping="Wrap" Text="Cycles Done: "/>
+
+        <TextBlock Name="PS_Stalled_Text" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,198,0,0" Text="F|F" Height="30" RenderTransformOrigin="0.48,0.495"/>
+        <TextBlock Name="PS_Text" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,231,0,0" Text="1." Height="30" RenderTransformOrigin="0.48,0.495"/>
+        <TextBlock Name="PS_Text2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,261,0,0" Text="2." Height="30" RenderTransformOrigin="0.48,0.495"/>
+        <TextBlock Name="PS_Text3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,291,0,0" Text="3." Height="30" RenderTransformOrigin="0.48,0.495"/>
+
+        <StackPanel Orientation="Horizontal" Height="350" Width="600" HorizontalAlignment="Left" Margin="0,339,0,195" >
+            <StackPanel  Width="190">
+                <TextBlock Name="Register0" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r0: "/>
+                <TextBlock Name="Register1" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r1: "/>
+                <TextBlock Name="Register2" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r2: "/>
+                <TextBlock Name="Register3" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r3: "/>
+                <TextBlock Name="Register4" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r4: "/>
+                <TextBlock Name="Register5" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r5: "/>
+                <TextBlock Name="Register6" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r6: "/>
+                <TextBlock Name="Register7" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r7: "/>
+                <TextBlock Name="Register8" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r8: "/>
+                <TextBlock Name="Register9" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r9: "/>
+                <TextBlock Name="Register10" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r10: "/>
+            </StackPanel>
+            <StackPanel  Width="190">
+
+                <TextBlock Name="Register11" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r11: "/>
+                <TextBlock Name="Register12" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r12: "/>
+                <TextBlock Name="Register13" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r13: "/>
+                <TextBlock Name="Register14" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r14: "/>
+                <TextBlock Name="Register15" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r15: "/>
+                <TextBlock Name="Register16" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r16: "/>
+                <TextBlock Name="Register17" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r17: "/>
+                <TextBlock Name="Register18" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r18: "/>
+                <TextBlock Name="Register19" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r19: "/>
+                <TextBlock Name="Register20" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r20: "/>
+                <TextBlock Name="Register21" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r21: "/>
+            </StackPanel>
+            <StackPanel Width="190">
+                <TextBlock Name="Register22" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r22: "/>
+                <TextBlock Name="Register23" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r23: "/>
+                <TextBlock Name="Register24" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r24: "/>
+                <TextBlock Name="Register25" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r25: "/>
+                <TextBlock Name="Register26" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r26: "/>
+                <TextBlock Name="Register27" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r27: "/>
+                <TextBlock Name="Register28" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r28: "/>
+                <TextBlock Name="Register29" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r29: "/>
+                <TextBlock Name="Register30" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r30: "/>
+                <TextBlock Name="Register31" HorizontalAlignment="Left" Margin="20,4,0,0" TextWrapping="Wrap" Text="r31: "/>
+            </StackPanel>
+        </StackPanel>
+
     </Grid>
 </Window>

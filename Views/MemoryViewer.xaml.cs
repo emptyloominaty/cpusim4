@@ -13,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace CpuSim3 {
+namespace CpuSim4 {
     /// <summary>
     /// Interaction logic for MemoryViewer.xaml
     /// </summary>

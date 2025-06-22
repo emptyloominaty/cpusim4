@@ -25,7 +25,7 @@ namespace CpuSim4 {
         public bool interruptHw = false;
         public int interruptId = 0;
 
-        public bool maxClock = true;
+        public bool maxClock = false;
         public long clockSet = 2;
 
         public int[] registers;
@@ -53,6 +53,7 @@ namespace CpuSim4 {
 
         public int cyclesTotal = 0;
         public int cyclesExecuting = 0;
+
 
         public bool debugCpu = false;
 
@@ -186,7 +187,7 @@ namespace CpuSim4 {
 
         }
 
-        bool fetchingStalled = false;
+        public bool fetchingStalled = false;
         public PipelineStage Fetch() {
             int pc = registers[33];
             pcFetch = pc;

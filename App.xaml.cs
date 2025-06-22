@@ -17,6 +17,7 @@ namespace CpuSim4 {
         public static string assemblerDebug;
 
         protected override void OnStartup(StartupEventArgs e) {
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             base.OnStartup(e);
 
             opCodes = new OpCodes();

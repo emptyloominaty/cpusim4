@@ -1,11 +1,11 @@
-﻿<Window x:Class="CpuSim4.MemoryViewer"
+﻿<Window x:Class="CpuSim4.CacheViewer"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CpuSim4"
         mc:Ignorable="d"
-        Title="MemoryViewer" Height="750" Width="650"
+        Title="CacheViewer" Height="750" Width="650"
         Background="#333333">
     <Grid>
         <TextBlock  HorizontalAlignment="Left"  VerticalAlignment="Top" Name="MemoryLine0" Margin="20,60,0,0" Width="600" Height="30" >
@@ -110,8 +110,9 @@
         </TextBlock>
 
 
-        <TextBox Name="AddressText" HorizontalAlignment="Left" Margin="20,21,0,0" TextWrapping="Wrap" Text="0x000000" VerticalAlignment="Top" Width="90" TextChanged="TextBox_MemoryViewer"/>
+        <TextBox Name="OffsetText" HorizontalAlignment="Left" Margin="20,21,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="90" TextChanged="TextBox_MemoryViewer"/>
         <Button Name="BtnAutoRefresh" Content="Auto Refresh: Off" HorizontalAlignment="Left" Margin="148,20,0,0" Click="Btn_AutoRefresh" VerticalAlignment="Top"/>
+        <Button Name="BtnCache" Content="Instruction Cache" HorizontalAlignment="Left" Margin="350,20,0,0" Click="Btn_Cache" VerticalAlignment="Top"/>
 
 
     </Grid>
