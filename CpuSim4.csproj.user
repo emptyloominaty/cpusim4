@@ -10,6 +10,9 @@
     <Compile Update="Views\MemoryViewer.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\StorageWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="MainWindow.xaml">

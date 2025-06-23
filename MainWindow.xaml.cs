@@ -24,10 +24,16 @@ namespace CpuSim4 {
         public DebugWindow debugWindow = new DebugWindow();
         public MemoryViewer memoryViewerWindow = new MemoryViewer();
         public CacheViewer cacheViewerWindow = new CacheViewer();
+
+        public List<StackPanel> deviceList = new List<StackPanel>();
+        public TextBox textBoxKey;
+
         public MainWindow() {
             InitializeComponent();
             Application.Current.MainWindow = this;
             CompositionTarget.Rendering += Main;
+
+            InitDeviceStackPanel();
         }
 
         public void Main(object sender, EventArgs e) {
@@ -59,6 +65,7 @@ namespace CpuSim4 {
             PS_Text.Text = "1. " + App.opCodes.codes[cpu.pipeline[0].op].name+" ";
             PS_Text2.Text = "2. " + App.opCodes.codes[cpu.pipeline[1].op].name + " ";
             PS_Text3.Text = "3. " + App.opCodes.codes[cpu.pipeline[2].op].name + " ";
+
         }
 
         private void ToggleCpu(object sender, RoutedEventArgs e) {
@@ -121,6 +128,103 @@ namespace CpuSim4 {
                 }
             }
         }
+
+        private void Btn_Display_Click(object sender, RoutedEventArgs e) {
+            Button button = (Button)sender;
+            Tuple<int, int> data = (Tuple<int, int>)button.Tag;
+
+            int deviceId = data.Item1;
+            int displayId = data.Item2;
+
+            if (App.displays[displayId].IsVisible) {
+                App.displays[displayId].Hide();
+            } else if (App.displays[displayId].IsLoaded) {
+                App.displays[displayId].Show();
+            } else {
+                App.displays[displayId] = new Display((byte)deviceId);
+                App.displays[displayId].Show();
+            }
+        }
+
+        private void Btn_Storage_Click(object sender, RoutedEventArgs e) {
+            Button button = (Button)sender;
+            Tuple<int, int> data = (Tuple<int, int>)button.Tag;
+
+            int deviceId = data.Item1;
+            int storageId = data.Item2;
+
+            if (App.storages[storageId].IsVisible) {
+                App.storages[storageId].Hide();
+            } else if (App.storages[storageId].IsLoaded) {
+                App.storages[storageId].Show();
+            } else {
+                App.storages[storageId] = new StorageWindow((byte)deviceId);
+                App.storages[storageId].Show();
+            }
+        }
+
+        private void InitDeviceStackPanel() {
+            bool keyBoardDev = false;
+            for (int i = 0; i < App.devices.Count; i++) {
+                StackPanel stackPanel = new StackPanel();
+                stackPanel.Orientation = Orientation.Horizontal;
+                deviceList.Add(stackPanel);
+
+                TextBlock textBox = new TextBlock();
+                textBox.Text = "Device_" + i;
+                textBox.Margin = new Thickness(0, 0, 10, 0);
+
+                TextBlock textBox_Type = new TextBlock();
+                textBox_Type.Text = Functions.GetDeviceType(App.devices[i].type);
+                textBox_Type.Margin = new Thickness(0, 0, 10, 0);
+
+                TextBlock textBox_Address = new TextBlock();
+                textBox_Address.Text = "0x" + (8388608 + (524288 * i)).ToString("X6");
+                textBox_Address.Margin = new Thickness(0, 0, 10, 0);
+
+                stackPanel.Children.Add(textBox);
+                stackPanel.Children.Add(textBox_Address);
+                stackPanel.Children.Add(textBox_Type);
+
+                int displayIdx = 0;
+                int storageIdx = 0;
+                if (App.devices[i].type == 8 && !keyBoardDev) {
+                    keyBoardDev = true;
+                    textBoxKey = new TextBox();
+                    textBoxKey.Width = 80;
+                    textBoxKey.Height = 30;
+                    textBoxKey.Name = "textBoxKey";
+                    textBoxKey.KeyDown += OnKeyDownHandler;
+                    stackPanel.Children.Add(textBoxKey);
+                } else if (App.devices[i].type == 4 || App.devices[i].type == 5) {
+                    Button Btn_Display = new Button();
+                    Btn_Display.Name = "Btn_Display";
+                    Btn_Display.Content = "Display";
+                    Btn_Display.Click += Btn_Display_Click;
+                    Btn_Display.Tag = Tuple.Create(i, displayIdx);
+                    displayIdx++;
+                    stackPanel.Children.Add(Btn_Display);
+                } else if (App.devices[i].type == 2) {
+                    Button Btn_Storage = new Button();
+                    Btn_Storage.Name = "Btn_Storage";
+                    Btn_Storage.Content = "Storage";
+                    Btn_Storage.Click += Btn_Storage_Click;
+                    Btn_Storage.Tag = Tuple.Create(i, storageIdx);
+                    storageIdx++;
+                    stackPanel.Children.Add(Btn_Storage);
+                }
+
+
+                DeviceList.Children.Add(stackPanel);
+
+            }
+        }
+
+        private void OnKeyDownHandler(object sender, KeyEventArgs e) {
+            App.key = (byte)KeyInterop.VirtualKeyFromKey(e.Key);
+            textBoxKey.Text = "";
+        }
+
 
     }
 

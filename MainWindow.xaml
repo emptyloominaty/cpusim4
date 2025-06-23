@@ -79,5 +79,7 @@
             </StackPanel>
         </StackPanel>
 
+        <StackPanel  Height="502" Width="450" Name="DeviceList" Margin="0,316,23,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+
     </Grid>
 </Window>

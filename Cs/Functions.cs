@@ -63,6 +63,30 @@ namespace CpuSim4 {
             return BitConverter.Int32BitsToSingle(intBits);
         }
 
+        public static string GetDeviceType(byte type) {
+            switch (type) {
+                case 0:
+                    return "";
+                case 1:
+                    return "Co-processor";
+                case 2:
+                    return "Storage";
+                case 3:
+                    return "Network";
+                case 4:
+                    return "VRAM+Display";
+                case 5:
+                    return "GPU";
+                case 6:
+                    return "User Storage Port";
+                case 7:
+                    return "Timer";
+                case 8:
+                    return "Keyboard";
+                default:
+                    return "";
+            }
+        }
 
 
     }
