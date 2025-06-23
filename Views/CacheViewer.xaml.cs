@@ -29,9 +29,9 @@ namespace CpuSim4 {
             int.TryParse(OffsetText.Text, out offset);
             offset = Math.Clamp(offset, 0, 224);
 
-            if (!App.cpu.cpuRunning || !App.cpu.threadRunning) {
+           /* if (!App.cpu.cpuRunning || !App.cpu.threadRunning) {
                 return;
-            }
+            }*/
             StringBuilder[] cacheLines = new StringBuilder[256];
 
             for (int tag = 0; tag < 128; tag++) {
@@ -117,10 +117,10 @@ namespace CpuSim4 {
 
         private void Btn_Cache(object sender, RoutedEventArgs e) {
             if (!instCache) {
-                BtnAutoRefresh.Content = "Instruction Cache";
+                BtnCache.Content = "Instruction Cache";
                 instCache = true;
             } else {
-                BtnAutoRefresh.Content = "Data Cache";
+                BtnCache.Content = "Data Cache";
                 instCache = false;
             }
         }
