@@ -915,7 +915,7 @@ namespace CpuSim4 {
                     address1 = Functions.ConvertTo24Bit(ps.arg2, ps.arg3, ps.arg4);
                     val = LoadBytes(address1, 4, out success);
                     if (success) {
-                        registersF[byte1] = (float)(val);
+                        registersF[byte1] = BitConverter.ToSingle(BitConverter.GetBytes(val), 0);
                     } else {
                         return;
                     }
