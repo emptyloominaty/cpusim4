@@ -66,6 +66,39 @@ namespace CpuSim4 {
             PS_Text2.Text = "2. " + App.opCodes.codes[cpu.pipeline[1].op].name + " ";
             PS_Text3.Text = "3. " + App.opCodes.codes[cpu.pipeline[2].op].name + " ";
 
+            Register0.Text = "r0: " + cpu.registers[0].ToString("X8");
+            Register1.Text = "r1: " + cpu.registers[1].ToString("X8");
+            Register2.Text = "r2: " + cpu.registers[2].ToString("X8");
+            Register3.Text = "r3: " + cpu.registers[3].ToString("X8");
+            Register4.Text = "r4: " + cpu.registers[4].ToString("X8");
+            Register5.Text = "r5: " + cpu.registers[5].ToString("X8");
+            Register6.Text = "r6: " + cpu.registers[6].ToString("X8");
+            Register7.Text = "r7: " + cpu.registers[7].ToString("X8");
+            Register8.Text = "r8: " + cpu.registers[8].ToString("X8");
+            Register9.Text = "r9: " + cpu.registers[9].ToString("X8");
+            Register10.Text = "r10: " + cpu.registers[10].ToString("X8");
+            Register11.Text = "r11: " + cpu.registers[11].ToString("X8");
+            Register12.Text = "r12: " + cpu.registers[12].ToString("X8");
+            Register13.Text = "r13: " + cpu.registers[13].ToString("X8");
+            Register14.Text = "r14: " + cpu.registers[14].ToString("X8");
+            Register15.Text = "r15: " + cpu.registers[15].ToString("X8");
+            Register16.Text = "r16: " + cpu.registers[16].ToString("X8");
+            Register17.Text = "r17: " + cpu.registers[17].ToString("X8");
+            Register18.Text = "r18: " + cpu.registers[18].ToString("X8");
+            Register19.Text = "r19: " + cpu.registers[19].ToString("X8");
+            Register20.Text = "r20: " + cpu.registers[20].ToString("X8");
+            Register21.Text = "r21: " + cpu.registers[21].ToString("X8");
+            Register22.Text = "r22: " + cpu.registers[22].ToString("X8");
+            Register23.Text = "r23: " + cpu.registers[23].ToString("X8");
+            Register24.Text = "r24: " + cpu.registers[24].ToString("X8");
+            Register25.Text = "r25: " + cpu.registers[25].ToString("X8");
+            Register26.Text = "r26: " + cpu.registers[26].ToString("X8");
+            Register27.Text = "r27: " + cpu.registers[27].ToString("X8");
+            Register28.Text = "r28: " + cpu.registers[28].ToString("X8");
+            Register29.Text = "r29: " + cpu.registers[29].ToString("X8");
+            Register30.Text = "r30: " + cpu.registers[30].ToString("X8");
+            Register31.Text = "r31: " + cpu.registers[31].ToString("X8");
+
         }
 
         private void ToggleCpu(object sender, RoutedEventArgs e) {

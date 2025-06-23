@@ -110,6 +110,7 @@ namespace CpuSim4 {
             pipeline[1] = new PipelineStage { op = 22 };
             pipeline[2] = new PipelineStage { op = 22 };
             pipelineStalled = false;
+            fetchingStalled = false;
         }
 
         public void StartCpu() {
@@ -993,6 +994,7 @@ namespace CpuSim4 {
         public void FlushPipeline() {
             pipeline[1] = new PipelineStage { op = 22 };
             pipeline[0] = new PipelineStage { op = 22 };
+            fetchingStalled = false;
         }
 
         public void PredictBranch(ref PipelineStage ps, int jumpAddress) {
