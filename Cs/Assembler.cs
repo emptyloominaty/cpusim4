@@ -3,6 +3,7 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -237,20 +238,40 @@ namespace CpuSim4 {
                     string val = line[3];
                     int val2;
                     bool hex = false;
-                    name = line[2];
-                    chars = line[3].Select(c => c.ToString()).ToArray();
-                    if (chars.Length > 2) {
-                        if (chars[0] == "0" && chars[1] == "x") {
-                            hex = true;
-                            val = line[3].Substring(2);
+
+                    int fvalue = 0;
+                    bool isFloat = false;
+                    if (line[1] == "F" || line[1] == "f") {
+                        float f;
+                        if (float.TryParse(val, CultureInfo.InvariantCulture, out f)) {
+                            //
+                        } else {
+                            App.assemblerDebug += "FLOAT ERR" + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + Environment.NewLine;
+                            f = 0f;
                         }
-                    }
-                    if (hex) {
-                        val2 = Convert.ToInt32(val, 16);
-                    } else {
-                        val2 = Convert.ToInt32(val);
+                        line[1] = "4";
+                        fvalue = BitConverter.ToInt32(BitConverter.GetBytes(f), 0);
+                        isFloat = true;
                     }
 
+                    if (isFloat) {
+                        name = line[2];
+                        val2 = fvalue;
+                    } else {
+                        name = line[2];
+                        chars = line[3].Select(c => c.ToString()).ToArray();
+                        if (chars.Length > 2) {
+                            if (chars[0] == "0" && chars[1] == "x") {
+                                hex = true;
+                                val = line[3].Substring(2);
+                            }
+                        }
+                        if (hex) {
+                            val2 = Convert.ToInt32(val, 16);
+                        } else {
+                            val2 = Convert.ToInt32(val);
+                        }
+                    }
                     consts[constIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]));
                     constsMap.Add(name, consts[constIdx]);
                     constIdx++;
@@ -263,18 +284,39 @@ namespace CpuSim4 {
                     string val = line[3];
                     int val2;
                     bool hex = false;
-                    name = line[2];
-                    chars = line[3].Select(c => c.ToString()).ToArray();
-                    if (chars.Length > 2) {
-                        if (chars[0] == "0" && chars[1] == "x") {
-                            hex = true;
-                            val = line[3].Substring(2);
+
+                    int fvalue = 0;
+                    bool isFloat = false;
+                    if (line[1] == "F" || line[1] == "f") {
+                        float f;
+                        if (float.TryParse(val, CultureInfo.InvariantCulture, out f)) {
+                            //
+                        } else {
+                            App.assemblerDebug += "FLOAT ERR" + line[0] +" "+ line[1] + " " + line[2] + " " + line[3] + " " + Environment.NewLine;
+                            f = 0f;
                         }
+                        line[1] = "4";
+                        fvalue = BitConverter.ToInt32(BitConverter.GetBytes(f), 0);
+                        isFloat = true;
                     }
-                    if (hex) {
-                        val2 = Convert.ToInt32(val, 16);
+
+                    if (isFloat) {
+                        name = line[2];
+                        val2 = fvalue;
                     } else {
-                        val2 = Convert.ToInt32(val);
+                        name = line[2];
+                        chars = line[3].Select(c => c.ToString()).ToArray();
+                        if (chars.Length > 2) {
+                            if (chars[0] == "0" && chars[1] == "x") {
+                                hex = true;
+                                val = line[3].Substring(2);
+                            }
+                        }
+                        if (hex) {
+                            val2 = Convert.ToInt32(val, 16);
+                        } else {
+                            val2 = Convert.ToInt32(val);
+                        }
                     }
 
                     vars[varIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]));

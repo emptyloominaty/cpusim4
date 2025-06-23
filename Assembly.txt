@@ -1,0 +1,95 @@
+//vars are copied to ram at the start of the program
+OS RAM			0x000300 - 0x001FFF (7 kB)
+App RAM			0x004000 - 0x3FEFFF (4076 kB)
+Functions RAM	0x3FF000 - 0x3FFFFF (4 kB)
+
+//const are stored in the rom with the instructions
+App ROM 		0x400000 - 0x5FFFFF (2 MB)
+Functions ROM 	0x600000 - 0x6FFFFF (1 MB)
+OS ROM 			0x700000 - 0x7FFFFF (1 MB)
+
+var 1 a 20			//1 byte with name "a" and value 20 stored in RAM
+var 2 b 2000		//2 bytes with name "b" and value 2000 stored in RAM
+var 3 c 600000		//3 bytes
+var 4 d 52648232	//4 bytes
+
+var 1 a 0x10		//1 byte with name "a" and value 0x10 stored in RAM
+var 2 b 0x1FFF
+var 3 c 0x15FFFF
+var 4 d 0x00FF10FF
+
+var f a 1.2			//float with name "a" and value 1.2 stored in RAM
+var F b 1.2
+
+const 4 a 10		//4 bytes with name "a" and value 10 stored in ROM
+const f b 0.1		//float with name "b" and value 0.1 stored in ROM
+
+//TODO:
+arr 
+
+
+//Interrupt pointers 0x000000 - 0x0002FF
+0x000000 = 0x7F
+0x000001 = 0x00
+0x000002 = 0x00
+//jump address for interrupt with id 0 is 0x7F0000
+
+----------------------------
+FUNC add //function with name "add"
+const 4 a 1
+const 4 b 1
+var 4 c 0
+
+LD4 r0 a
+LD4 r1 b
+ADD r0 r1 r2
+ST4 r2 c
+HLT
+
+----------------------------
+FUNC add	 //function with name "add"
+ADD r0 r1 r2 //r0 + r1 = r2
+RFS          //return
+
+APP appTest //application with name "appTest"
+LDI1 r0 1	//load immediate value 1 to register r0
+LDI1 r1 1	//load immediate value 1 to register r0
+JSR add		//Jump to function add
+HLT
+
+OS			//main (starts at address: 0x700000)
+JMP appTest //jump to appTest
+
+-----------------------------
+const 4 a 50
+const 4 b 100
+
+JSR test
+JSR test2
+JSR test3
+STOP
+
+.ORG 0x7000FF
+<test>
+LD4 r0 a
+LD4 r1 b
+RFS
+
+.ORG 0x7001FF
+<test2>
+ADD r0 r1 r2
+RFS
+-ORG
+
+<test3>
+LDI1 r11 1
+LDI1 r12 2
+LDI1 r13 3
+LDI1 r14 4
+LDI1 r15 5
+LDI1 r16 6
+LDI1 r17 7
+LDI1 r18 8
+LDI1 r19 9
+RFS
+-----------------------------
