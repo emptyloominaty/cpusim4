@@ -23,6 +23,14 @@ var f a 1.2			//float with name "a" and value 1.2 stored in RAM
 const 4 a 10		//4 bytes with name "a" and value 10 stored in ROM
 const f b 0.1		//float with name "b" and value 0.1 stored in ROM
 
+----------------------------POINTERS--------------------------
+var 4 a 4
+var 4 b 9
+var 3 c &a
+
+LD3 r10 c
+HLT 
+
 ----------------------------ARRAYS----------------------------
 arr 255 array //255 bytes array, access starting address with array_address
 

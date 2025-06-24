@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CpuSim4 {
     public static class Assembler {
@@ -272,7 +273,7 @@ namespace CpuSim4 {
                             val2 = Convert.ToInt32(val);
                         }
                     }
-                    consts[constIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]));
+                    consts[constIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]),constIdx);
                     constsMap.Add(name, consts[constIdx]);
                     constIdx++;
                 } else if (line[0] == "VAR" || line[0] == "var") {
@@ -283,8 +284,28 @@ namespace CpuSim4 {
                     string[] chars;
                     string val = line[3];
                     int val2;
+                    name = line[2];
                     bool hex = false;
 
+                    bool pointer = false;
+                    int pointerId = 0;
+
+                    //pointers
+                    if (val.StartsWith("&")) {
+                        val = val.Substring(1);
+                        pointer = true;                     
+
+                        if (varsMap[val] is AsVar v) {
+                            pointerId = v.idx;
+                        } else {
+                            App.assemblerDebug += "Pointer ERR" + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + Environment.NewLine;
+                        }
+
+                        val2 = pointerId;
+                        goto VarSkip;
+                    }
+
+                    //float
                     int fvalue = 0;
                     bool isFloat = false;
                     if (line[1] == "F" || line[1] == "f") {
@@ -301,10 +322,8 @@ namespace CpuSim4 {
                     }
 
                     if (isFloat) {
-                        name = line[2];
                         val2 = fvalue;
                     } else {
-                        name = line[2];
                         chars = line[3].Select(c => c.ToString()).ToArray();
                         if (chars.Length > 2) {
                             if (chars[0] == "0" && chars[1] == "x") {
@@ -319,7 +338,8 @@ namespace CpuSim4 {
                         }
                     }
 
-                    vars[varIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]));
+                VarSkip:
+                    vars[varIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]),varIdx, pointer);
                     varsMap.Add(name, vars[varIdx]);
                     varIdx++;
                 } else if (line[0] == "ARR" || line[0] == "arr") {
@@ -341,7 +361,7 @@ namespace CpuSim4 {
                         val2 = Convert.ToInt32(val);
                     }
 
-                    consts[constIdx] = new AsVar(name + "_address", 0, 0, 3);
+                    consts[constIdx] = new AsVar(name + "_address", 0, 0, 3, constIdx);
                     constsMap.Add(name + "_address", consts[constIdx]);
 
                     arrays[arrayIdx] = new AsArray(name, val2, 0, constIdx);
@@ -503,7 +523,13 @@ namespace CpuSim4 {
                     Memory.Write(codeStartAddress + ldibytes + 8, varaddress[2], true);
                     ldibytes += 9;
                 } else if (vars[i].bytes == 3) {
-                    Functions.ConvertFrom24Bit((int)vars[i].value, store);
+
+                    if (vars[i].pointer) {
+                        Functions.ConvertFrom24Bit(vars[vars[i].value].address, store);
+                    } else {
+                        Functions.ConvertFrom24Bit((int)vars[i].value, store);
+                    }
+
                     Memory.Write(codeStartAddress + ldibytes, 13, true); //LDI3
                     Memory.Write(codeStartAddress + ldibytes + 1, 0, true);
                     Memory.Write(codeStartAddress + ldibytes + 2, store[0], true);
@@ -737,12 +763,16 @@ namespace CpuSim4 {
         public int value;
         public int address;
         public byte bytes;
+        public bool pointer;
+        public int idx;
 
-        public AsVar(string name, int value, int address, byte bytes) {
+        public AsVar(string name, int value, int address, byte bytes,int idx, bool pointer = false) {
             this.name = name;
             this.value = value;
             this.address = address;
             this.bytes = bytes;
+            this.idx = idx;
+            this.pointer = pointer;
         }
     }
 
