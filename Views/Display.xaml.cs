@@ -46,10 +46,6 @@ namespace CpuSim4 {
                 height = 2048;
             }
 
-            //512(511)=512
-            width++;
-            height++;
-
             bitmap.Lock();
             if (colorMode == 1) {
                 for (int y = 0; y < height; y++) {

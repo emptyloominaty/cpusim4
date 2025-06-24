@@ -28,6 +28,9 @@ namespace CpuSim4 {
         public List<StackPanel> deviceList = new List<StackPanel>();
         public TextBox textBoxKey;
 
+        public int displayWait = 0;
+        public long time1 = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+
         public MainWindow() {
             InitializeComponent();
             Application.Current.MainWindow = this;
@@ -38,6 +41,29 @@ namespace CpuSim4 {
 
         public void Main(object sender, EventArgs e) {
             Cpu cpu = App.cpu;
+
+            long ticks = TimeSpan.TicksPerMillisecond;
+            if (ticks < 1) {
+                ticks = 1;
+            }
+            long ms = ((DateTime.Now.Ticks / ticks) - time1);
+            long fps = 0;
+            if (ms > 0) {
+                fps = 1000 / ms;
+            }
+
+            if (displayWait < 30) {
+                displayWait++;
+            } else {
+                displayWait = 0;
+                for (int i = 0; i < App.displays.Count; i++) {
+                    if (App.displays[i].IsLoaded && App.displays[i].IsVisible) {
+                        App.displays[i].UpdateWindow();
+                    }
+                }
+            }
+
+            time1 = DateTime.Now.Ticks / ticks;
 
             if (memoryViewerWindow.IsLoaded) {
                 memoryViewerWindow.UpdateWindow();
