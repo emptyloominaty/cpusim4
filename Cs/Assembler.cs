@@ -239,6 +239,25 @@ namespace CpuSim4 {
                     string val = line[3];
                     int val2;
                     bool hex = false;
+                    bool binary = false;
+                    name = line[2];
+                    bool pointer = false;
+                    int pointerId = 0;
+
+                    //pointers
+                    if (val.StartsWith("&")) {
+                        val = val.Substring(1);
+                        pointer = true;
+
+                        if (constsMap[val] is AsVar v) {
+                            pointerId = v.idx;
+                        } else {
+                            App.assemblerDebug += "Pointer ERR" + line[0] + " " + line[1] + " " + line[2] + " " + line[3] + " " + Environment.NewLine;
+                        }
+
+                        val2 = pointerId;
+                        goto ConstSkip;
+                    }
 
                     int fvalue = 0;
                     bool isFloat = false;
@@ -256,24 +275,29 @@ namespace CpuSim4 {
                     }
 
                     if (isFloat) {
-                        name = line[2];
                         val2 = fvalue;
                     } else {
-                        name = line[2];
                         chars = line[3].Select(c => c.ToString()).ToArray();
                         if (chars.Length > 2) {
                             if (chars[0] == "0" && chars[1] == "x") {
                                 hex = true;
                                 val = line[3].Substring(2);
                             }
+                            if (chars[0] == "0" && chars[1] == "b") {
+                                binary = true;
+                                val = line[3].Substring(2);
+                            }
                         }
                         if (hex) {
                             val2 = Convert.ToInt32(val, 16);
+                        } else if (binary) {
+                            val2 = Convert.ToInt32(val, 2);
                         } else {
                             val2 = Convert.ToInt32(val);
                         }
                     }
-                    consts[constIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]),constIdx);
+                ConstSkip:
+                    consts[constIdx] = new AsVar(name, val2, 0, Convert.ToByte(line[1]),constIdx,pointer);
                     constsMap.Add(name, consts[constIdx]);
                     constIdx++;
                 } else if (line[0] == "VAR" || line[0] == "var") {
@@ -286,6 +310,7 @@ namespace CpuSim4 {
                     int val2;
                     name = line[2];
                     bool hex = false;
+                    bool binary = false;
 
                     bool pointer = false;
                     int pointerId = 0;
@@ -330,9 +355,15 @@ namespace CpuSim4 {
                                 hex = true;
                                 val = line[3].Substring(2);
                             }
+                            if (chars[0] == "0" && chars[1] == "b") {
+                                binary = true;
+                                val = line[3].Substring(2);
+                            }
                         }
                         if (hex) {
                             val2 = Convert.ToInt32(val, 16);
+                        } else if (binary) {
+                            val2 = Convert.ToInt32(val,2);
                         } else {
                             val2 = Convert.ToInt32(val);
                         }
@@ -449,17 +480,21 @@ namespace CpuSim4 {
                     consts[i].address = constsAddress + constsBytes;
                     constsBytes += consts[i].bytes;
                 }
-                App.assemblerDebug += "const: " + consts[i].name + " " + (consts[i].address).ToString("X6") + Environment.NewLine;
+                App.assemblerDebug += "const: " + consts[i].name + " " + (consts[i].address).ToString("X6") + " " + consts[i].value.ToString("X6") + Environment.NewLine;
                 //write consts to memory(rom)
                 byte[] store = new byte[4];
                 if (consts[i].bytes == 1) {
-                    Memory.Write(consts[i].address, (byte)consts[i].value);
+                    Memory.Write(consts[i].address, (byte)consts[i].value, true);
                 } else if (consts[i].bytes == 2) {
                     Functions.ConvertFrom16Bit((int)consts[i].value, store);
                     Memory.Write(consts[i].address, store[0], true);
                     Memory.Write(consts[i].address + 1, store[1], true);
                 } else if (consts[i].bytes == 3) {
-                    Functions.ConvertFrom24Bit((int)consts[i].value, store);
+                    if (consts[i].pointer) {
+                        Functions.ConvertFrom24Bit(consts[consts[i].value].address, store);
+                    } else {
+                        Functions.ConvertFrom24Bit((int)consts[i].value, store);
+                    }
                     Memory.Write(consts[i].address, store[0], true);
                     Memory.Write(consts[i].address + 1, store[1], true);
                     Memory.Write(consts[i].address + 2, store[2], true);

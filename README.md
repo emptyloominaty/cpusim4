@@ -153,7 +153,7 @@ Reset Vector: 0x700000
 | 104 - FMUL   |   20    |   4   |  -  | 0x68  | reg[F] |  reg[F]  |  reg[F]  |    -    |   -   |
 | 105 - FDIV   |   36    |   4   |  -  | 0x69  | reg[F] |  reg[F]  |  reg[F] |    -    |   -   |
 | 106 - FIMOV   |   3    |   3   |  -  | 0x6a  | reg[F] |  reg  |  -  |    -    |   -   |
-| 107 - IFMOV   |   3    |   3   |  -  | 0x6b  | reg |  reg[F]  |  -  |    -    |   -   |
+| 107 - IFMOV   |   3    |   3   |  -  | 0x6b  | reg    |  reg[F]  |  -  |    -    |   -   |
 | 108 - FCOMP   |   6    |   4   |  -  | 0x6c  | reg[F] |  reg[F]  |  reg  |    -    |   -   |
 
 

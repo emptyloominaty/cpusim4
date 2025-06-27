@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reflection.Emit;
@@ -646,8 +647,7 @@ namespace CpuSim4 {
                     registers[37] = 1;
                     break;
                 case 57: //INT 
-                    //TODO: TEST
-                    if (registers[37] == 0) {
+                    if (registers[37] == 1) {
                         return;
                     }
                     val = LoadBytes(ps.arg1 * 3, 3, out success);
@@ -664,15 +664,17 @@ namespace CpuSim4 {
                         registers[34]++;
                         WriteByteCache(registers[34], cacheD, (byte)registers[36]);
                         registers[34]++;
-
-                        registers[33] = val;
+                        if (val!=0) {
+                            registers[33] = val;
+                        }
+                        fetchingStalled = false;
+                        FlushPipeline();
                     } else {
                         return;
                     }
                     
                     break;
                 case 58: //RFI
-                    //TODO:TEST
                     val = LoadBytes(registers[34] - 1, 1, out success);
                     if (success) {
                         registers[34]--;
@@ -687,11 +689,13 @@ namespace CpuSim4 {
                     if (success) {
                         registers[34]-= 3;
                         registers[33] = val;
+                        fetchingStalled = false;
                     }
                     break;
                 case 59: //HLT
                     halted = true;
                     registers[37] = 0;
+                    FlushPipeline();
                     break;
                 case 60: //LDR1
                     if (ReadByteCache(registers[ps.arg2], cacheD, out byte1)) {
@@ -1122,6 +1126,7 @@ namespace CpuSim4 {
                 interruptHw = true;
                 interruptId = id;
                 halted = false;
+                FlushPipeline();
             }
         }
 

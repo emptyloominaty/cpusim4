@@ -30,6 +30,14 @@ var 3 c &a
 
 LD3 r10 c
 HLT 
+---------------
+const 1 _const_0 0b10
+const 1 _const_1 0b100
+const 3 const_address &_const_0 
+
+LD3 r0 const_address
+INC r0
+LDR1 r1 r0 ; r1 = 0b100;
 
 ----------------------------ARRAYS----------------------------
 arr 255 array //255 bytes array, access starting address with array_address

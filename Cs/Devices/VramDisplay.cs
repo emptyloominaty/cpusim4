@@ -34,10 +34,10 @@ namespace CpuSim4.Devices {
             }
 
 
-            Write(0x1000, 0xFF);
+            /*TEST: Write(0x1000, 0xFF);
             Write(0x1001, 0xFF);
             Write(0x1002, 0xFF);
-            Write(0x1003, 0xFF);
+            Write(0x1003, 0xFF);*/
 
             App.displays.Add(new Display(id));
         }

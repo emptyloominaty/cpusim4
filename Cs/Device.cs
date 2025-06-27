@@ -52,9 +52,9 @@ namespace CpuSim4 {
             Functions.ConvertFrom16Bit(burstSize, bytes);
             Memory.Data[startAddress + 10] = bytes[0]; //IOSize
 
-            Memory.Data[startAddress + 11] = 0; //CpuReady Int6
+            Memory.Data[startAddress + 11] = 0; //CpuReady Int6 (Reg0-Reg3)
             Memory.Data[startAddress + 12] = 0; //CpuReady Int7 (Burst)
-            Memory.Data[startAddress + 13] = 0; //DeviceReady Int6
+            Memory.Data[startAddress + 13] = 0; //DeviceReady Int6 (Reg0-Reg3)
             Memory.Data[startAddress + 14] = 0; //DeviceReady Int7 (Burst)
 
             //Reg0 (4x8B)
