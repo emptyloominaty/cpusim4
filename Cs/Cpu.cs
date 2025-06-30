@@ -184,7 +184,7 @@ namespace CpuSim4 {
             if (debugCpu) {
                 PipelineStage ps = pipeline[2];
                 App.cpuDebug += " PC:" + (pcFetch).ToString("X6") +"("+ opCodes[opFetched].name + ")"+ " | " + instructionsDone + ": " + opCodes[ps.op].name + " " + ps.arg1.ToString("X2") + " " + ps.arg2.ToString("X2") + " " + ps.arg3.ToString("X2") + " " + ps.arg4.ToString("X2") + " " + ps.arg5.ToString("X2")
-                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " pipeline: " + opCodes[pipeline[0].op].name + " - " + opCodes[pipeline[1].op].name + " - " + opCodes[pipeline[2].op].name + " Stall: " + fetchingStalled + "/" + pipelineStalled + Environment.NewLine;
+                    + " - registers - " + " " + registers[0] + " " + registers[1] + " " + registers[2] + " pipeline: " + opCodes[pipeline[0].op].name + " - " + opCodes[pipeline[1].op].name + " - " + opCodes[pipeline[2].op].name + " Stall: " + (fetchingStalled ? "Y" : "N") + " / " + (pipelineStalled ? "Y" : "N") +" | Stack:"+ registers[34].ToString("X6")+ Environment.NewLine;
             }
 
         }
@@ -196,11 +196,12 @@ namespace CpuSim4 {
             PipelineStage ps = new PipelineStage { op = 22 };
             byte opcode;
             opFetched = 22;
-            if (fetchingStalled) {
+            if (fetchingStalled || halted) {
                 return ps;
             }
 
             if (interruptHw) {
+                fetchingStalled = true;
                 interruptHw = false;
                 ps.op = 57;
                 ps.arg1 = (byte)interruptId;
@@ -259,6 +260,8 @@ namespace CpuSim4 {
             } else if (ps.op >= 79 && ps.op <= 86) { //Short conditional jumps
                 int jumpAddress = registers[33] + ps.arg3 - 128;
                 PredictBranch(ref ps, jumpAddress);
+            } else if (ps.op == 59) {
+                fetchingStalled = true;
             }
 
             //prefetch next line
@@ -694,6 +697,7 @@ namespace CpuSim4 {
                     break;
                 case 59: //HLT
                     halted = true;
+                    fetchingStalled = true;
                     registers[37] = 0;
                     FlushPipeline();
                     break;
