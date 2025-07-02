@@ -407,6 +407,7 @@ namespace CpuSim4 {
                     } else {
                         functions[functionIdx] = new AsFunction(functionName, i, orgAddress + orgBytes);
                     }
+                    App.assemblerDebug += functions[functionIdx].address.ToString("X6") + " <" + functions[functionIdx].name + ">" + Environment.NewLine;
                     functionsMap.Add(functionName, functions[functionIdx]);
                 } else if (!string.IsNullOrEmpty(line[0].Trim())) { //instruction
                     int idInst;
@@ -716,7 +717,6 @@ namespace CpuSim4 {
             if (app) {
                 osApps[osApps.Count - 1].size = bytes + constsBytes + varsBytes + arrayBytes + 6;
             }
-
             if (bytes > 4) {
                 App.assemblerDebug += "----------" + Environment.NewLine;
                 App.assemblerDebug += "Size: " + bytes + Environment.NewLine;

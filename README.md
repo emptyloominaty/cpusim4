@@ -8,22 +8,27 @@
 * Address Width: **24-bit**
 * Bus: **64-bit** Data + **24-bit** Address
 
-* Cache
-	- **2kB** Instruction Cache 
-	- **2kB** Data Cache
-	- **8B** cache line,  **2-way** set associative
+### Cache
+**8B** cache line <br>
+**2-way** set associative  <br>
+Write-Through + No-Write-Allocate
+* **2kB** Instruction Cache 
+* **2kB** Data Cache 
+
 	
 
-* Registers: 
-    - 32 32-Bit Registers (**r0-r31**)  <br/>
-    - RESERVED (**r32**)
-    - Program Counter (**r33**)
-    - Stack Pointer (**r34**) 
-    - Carry (**r35**)
-    - Overflow (**r36**)
-    - Interrupt Disabled  (**r37**)
-	- 32 32-bit Floating Point Registers (**r64-r95**)
-    <br/>
+### Registers: 
+* 32 32-Bit Registers (**r0-r31**)
+* RESERVED (**r32**)
+* Program Counter (**r33**)
+* Stack Pointer (**r34**) 
+* Carry (**r35**)
+* Overflow (**r36**)
+* Interrupt Disabled  (**r37**)
+* 32 32-bit Floating Point Registers (**r64-r95**)
+
+<br>
+
 * IPC: **0.68**
 * Stack: **8192 Bytes**
 
