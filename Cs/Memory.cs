@@ -26,7 +26,7 @@ namespace CpuSim4 {
             }
 
             //TEST CODE
-            Write(7340032, 3, true);
+            /*Write(7340032, 3, true);
             Write(7340033, 0, true);
             Write(7340034, 0x70, true);
             Write(7340035, 0, true);
@@ -61,7 +61,7 @@ namespace CpuSim4 {
             Write(7340057, 16, true);
             Write(7340058, 0, true);
 
-            Write(7340059, 25, true);
+            Write(7340059, 25, true);*/
 
 
 

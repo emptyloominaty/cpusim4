@@ -123,3 +123,8 @@ LDI1 r18 8
 LDI1 r19 9
 RFS
 -----------------------------
+
+Machine Code Input:
+
+700000: 0B 00 FF 0B 01 01 02 00 01 02 00  //LDI1 r0 255, LDI r1 1, SUB r0 r1 r2, STOP
+5FFFFF: 00 00 00 00 00

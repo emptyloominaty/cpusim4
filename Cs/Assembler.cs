@@ -512,12 +512,21 @@ namespace CpuSim4 {
             if (functionMode || app) {
                 ldibytes += 1;
             }
-            Memory.Write(codeStartAddress, 24, true);
-            byte[] varInitFunctionAddress = new byte[3];
-            Functions.ConvertFrom24Bit(codeStartAddress + ldibytes, varInitFunctionAddress);
-            Memory.Write(codeStartAddress + 1, varInitFunctionAddress[0], true);
-            Memory.Write(codeStartAddress + 2, varInitFunctionAddress[1], true);
-            Memory.Write(codeStartAddress + 3, varInitFunctionAddress[2], true);
+
+            if (varIdx>0) { 
+                Memory.Write(codeStartAddress, 24, true);
+                byte[] varInitFunctionAddress = new byte[3];
+                Functions.ConvertFrom24Bit(codeStartAddress + ldibytes, varInitFunctionAddress);
+                Memory.Write(codeStartAddress + 1, varInitFunctionAddress[0], true);
+                Memory.Write(codeStartAddress + 2, varInitFunctionAddress[1], true);
+                Memory.Write(codeStartAddress + 3, varInitFunctionAddress[2], true);
+            } else {
+                Memory.Write(codeStartAddress, 22, true);
+                Memory.Write(codeStartAddress + 1, 22, true);
+                Memory.Write(codeStartAddress + 2, 22, true);
+                Memory.Write(codeStartAddress + 3, 22, true);
+            }
+
 
             int varsAddress = varStartAddress;
             if (functionMode || app) {
@@ -752,24 +761,23 @@ namespace CpuSim4 {
         }
 
         public static void LoadMachineCode(string code) {
-            int codeStartAddress = 7340032;
-            if (os) {
-                codeStartAddress = 7340032;
-            } else {
-                codeStartAddress = 4194304;
-            }
-
             Memory.Init();
-            string[] bytes;
-            byte[] bytes2 = new byte[4194304];
-            code = code.Replace("\n", "");
+            code = code.Replace("\r", "").Replace("\n", "");
 
-            // 700000 50,700001 20,
-            bytes = code.Split(',');
-            for (int i = 0; i < bytes.Length; i++) {
-                string[] data = bytes[i].Split(" ");
-                bytes2[i] = Convert.ToByte(data[1], 16);
-                Memory.Write(Convert.ToInt32(data[0], 16), bytes2[i], true);
+            string[] parts = code.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            int currentAddress = -1;
+
+            //700000: 50 FF 20 30 66 FF 99 FF 27 FA A5 50FFFF: 21 01 00 00 FF 5FFFFF: 00 00 01 02 00 AA
+            foreach (string part in parts) {
+                if (part.EndsWith(":")) {
+                    string addrStr = part.Substring(0, part.Length - 1);
+                    currentAddress = Convert.ToInt32(addrStr, 16);
+                } else {
+                    byte value = Convert.ToByte(part, 16);
+                    Memory.Write(currentAddress, value, true);
+                    currentAddress++;
+                }
             }
         }
 
